@@ -159,4 +159,35 @@ class TransactionRepository extends BaseRepository
         $stmt->execute();
         return $stmt->fetchAll();
     }
+
+    public function byCategory(int $userId, int $year, int $month): array
+    {
+        $dateFrom = sprintf('%04d-%02d-01', $year, $month);
+        $dateFrom = date('Y-m-t', strtotime($dateFrom));
+        $dateTo   = sprintf('%04d-%02d-%02d', $year, $month, date('t', mktime(0, 0, 0, $month, 1, $year)));
+
+        $stmt = $this->db->prepare(
+            "SELECT 
+                c.id, 
+                c.name, 
+                c.color, 
+                c.icon,
+                t.type,
+                COALESCE(SUM(t.amount), 0) AS total,
+                COUNT(t.id) AS count
+             FROM transactions t
+             LEFT JOIN categories c ON c.id = t.category_id
+             WHERE t.user_id = :uid
+               AND YEAR(t.transaction_date) = :year
+               AND MONTH(t.transaction_date) = :month
+             GROUP BY c.id, t.type
+             ORDER BY total DESC"
+        );
+        $stmt->execute([
+            ':uid'  => $userId,
+            ':year' => $year,
+            ':month' => $month,
+        ]);
+        return $stmt->fetchAll();
+    }
 }

@@ -46,16 +46,19 @@ if (file_exists($envFile)) {
 // ─── Load helpers ────────────────────────────────────────────────────────────
 require_once SRC_PATH . '/Helpers/functions.php';
 
+// ─── Load core exceptions ────────────────────────────────────────────────────
+require_once SRC_PATH . '/Exceptions/AppException.php';
+
 // ─── Error handling ──────────────────────────────────────────────────────────
 if (env('APP_DEBUG', 'false') === 'true') {
     error_reporting(E_ALL);
-    ini_set('display_errors', '1');// Always off - use JSON responses
+    ini_set('display_errors', '0');
 } else {
     error_reporting(0);
     ini_set('display_errors', '0');
 }
 
-/*set_exception_handler(function (Throwable $e): void {
+set_exception_handler(function (Throwable $e): void {
     http_response_code(500);
     header('Content-Type: application/json');
     echo json_encode([
@@ -63,8 +66,7 @@ if (env('APP_DEBUG', 'false') === 'true') {
         'message' => $e->getMessage(),
         'file'    => $e->getFile(),
         'line'    => $e->getLine(),
-        'trace'   => $e->getTraceAsString(),
-        'code'    => 500,
-    ]);
+        'code'    => $e->getCode() ?: 500,
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
-});*/
+});

@@ -41,4 +41,37 @@ class DashboardController extends BaseController
             jsonResponse($forecastData);
         } catch (\Throwable $e) { $this->handleException($e); }
     }
+
+    // GET /api/dashboard/summary?month=2026-05
+    public function summary(): void
+    {
+        try {
+            $payload = $this->auth->authenticate();
+            $month   = $this->queryParam('month', date('Y-m'));
+            $data    = $this->dashService->getMonthSummary($payload['sub'], $month);
+            jsonResponse($data);
+        } catch (\Throwable $e) { $this->handleException($e); }
+    }
+
+    // GET /api/dashboard/evolution?months=12
+    public function evolution(): void
+    {
+        try {
+            $payload = $this->auth->authenticate();
+            $months  = (int) $this->queryParam('months', 12);
+            $data    = $this->txService->evolution($payload['sub'], $months);
+            jsonResponse($data);
+        } catch (\Throwable $e) { $this->handleException($e); }
+    }
+
+    // GET /api/dashboard/by-category?month=2026-05
+    public function byCategory(): void
+    {
+        try {
+            $payload = $this->auth->authenticate();
+            $month   = $this->queryParam('month', date('Y-m'));
+            $data    = $this->dashService->getByCategory($payload['sub'], $month);
+            jsonResponse($data);
+        } catch (\Throwable $e) { $this->handleException($e); }
+    }
 }
