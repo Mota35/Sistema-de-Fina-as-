@@ -49,26 +49,22 @@ require_once SRC_PATH . '/Helpers/functions.php';
 // ─── Error handling ──────────────────────────────────────────────────────────
 if (env('APP_DEBUG', 'false') === 'true') {
     error_reporting(E_ALL);
-    ini_set('display_errors', '0'); // Always off - use JSON responses
+    ini_set('display_errors', '1');// Always off - use JSON responses
 } else {
     error_reporting(0);
     ini_set('display_errors', '0');
 }
 
-set_exception_handler(function (Throwable $e): void {
-    $logger = new \App\Helpers\Logger();
-    $logger->error($e->getMessage(), [
-        'file'  => $e->getFile(),
-        'line'  => $e->getLine(),
-        'trace' => $e->getTraceAsString(),
-    ]);
-
+/*set_exception_handler(function (Throwable $e): void {
     http_response_code(500);
     header('Content-Type: application/json');
     echo json_encode([
         'success' => false,
-        'message' => env('APP_DEBUG') === 'true' ? $e->getMessage() : 'Internal Server Error',
+        'message' => $e->getMessage(),
+        'file'    => $e->getFile(),
+        'line'    => $e->getLine(),
+        'trace'   => $e->getTraceAsString(),
         'code'    => 500,
     ]);
     exit;
-});
+});*/

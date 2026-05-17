@@ -9,6 +9,7 @@ use App\Controllers\GoalController;
 use App\Controllers\UserController;
 use App\Controllers\DashboardController;
 use App\Controllers\FinanceController;
+use App\Controllers\BudgetController;
 
 $router = new Router();
 
@@ -60,6 +61,9 @@ $router->post('/api/profile/avatar', [UserController::class, 'uploadAvatar']);
 // ─────────────────────────────────────────────────────────────────────────────
 $router->get('/api/dashboard',          [DashboardController::class, 'index']);
 $router->get('/api/dashboard/forecast', [DashboardController::class, 'forecast']);
+$router->get('/api/dashboard/summary',     [DashboardController::class, 'summary']);
+$router->get('/api/dashboard/evolution',   [DashboardController::class, 'evolution']);
+$router->get('/api/dashboard/by-category', [DashboardController::class, 'byCategory']);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ACCOUNTS  (protected)
@@ -152,5 +156,11 @@ $router->get(   '/api/admin/users',      [UserController::class, 'adminIndex']);
 $router->get(   '/api/admin/users/{id}', [UserController::class, 'adminShow']);
 $router->patch( '/api/admin/users/{id}', [UserController::class, 'adminUpdate']);
 $router->delete('/api/admin/users/{id}', [UserController::class, 'adminDestroy']);
+
+// Budget routes
+$router->get(   '/api/budgets',      [BudgetController::class, 'index']);
+$router->post(  '/api/budgets',      [BudgetController::class, 'store']);
+$router->put(   '/api/budgets/{id}', [BudgetController::class, 'update']);
+$router->delete('/api/budgets/{id}', [BudgetController::class, 'destroy']);
 
 return $router;

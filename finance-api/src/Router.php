@@ -65,7 +65,14 @@ class Router
     {
         $method = $_SERVER['REQUEST_METHOD'];
         $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $uri    = rtrim($uri, '/') ?: '/';
+
+        // Remove subfolder prefix quando corre dentro de /finance-api/public/
+        $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+        if ($basePath && str_starts_with($uri, $basePath)) {
+            $uri = substr($uri, strlen($basePath));
+        }
+
+        $uri = rtrim($uri, '/') ?: '/';
 
         foreach ($this->routes as $route) {
             if ($route['method'] !== $method) continue;
@@ -124,7 +131,7 @@ class Router
             return;
         }
 
-        errorResponse(
+       errorResponse(
             env('APP_DEBUG') === 'true' ? $e->getMessage() : 'Internal Server Error',
             500
         );

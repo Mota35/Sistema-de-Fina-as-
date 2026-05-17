@@ -20,11 +20,11 @@ export class AuthService {
   readonly isAuthenticated = computed(() => !!this._user());
   readonly isAdmin         = computed(() => this._user()?.role === 'admin');
 
-  login(payload: LoginPayload): Observable<ApiResponse<{ user: User; tokens: AuthTokens }>> {
-    return this.http.post<ApiResponse<{ user: User; tokens: AuthTokens }>>(API.AUTH.LOGIN, payload).pipe(
+  login(payload: LoginPayload): Observable<any> {
+    return this.http.post<any>(API.AUTH.LOGIN, payload).pipe(
       tap(res => {
         if (res.success) {
-          this.storeTokens(res.data.tokens);
+          this.storeTokens(res.data);
           this._user.set(res.data.user);
           localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(res.data.user));
         }
@@ -32,11 +32,11 @@ export class AuthService {
     );
   }
 
-  register(payload: RegisterPayload): Observable<ApiResponse<{ user: User; tokens: AuthTokens }>> {
-    return this.http.post<ApiResponse<{ user: User; tokens: AuthTokens }>>(API.AUTH.REGISTER, payload).pipe(
+  register(payload: RegisterPayload): Observable<any> {
+    return this.http.post<any>(API.AUTH.REGISTER, payload).pipe(
       tap(res => {
         if (res.success) {
-          this.storeTokens(res.data.tokens);
+          this.storeTokens(res.data);
           this._user.set(res.data.user);
           localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(res.data.user));
         }
