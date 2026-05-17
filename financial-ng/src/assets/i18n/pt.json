@@ -1,0 +1,142 @@
+{
+  "APP": {
+    "NAME": "FinancePro",
+    "TAGLINE": "Gestão financeira inteligente"
+  },
+  "NAV": {
+    "DASHBOARD":    "Dashboard",
+    "TRANSACTIONS": "Transações",
+    "ACCOUNTS":     "Contas",
+    "CATEGORIES":   "Categorias",
+    "BUDGET":       "Orçamento",
+    "GOALS":        "Metas",
+    "REPORTS":      "Relatórios",
+    "SETTINGS":     "Configurações"
+  },
+  "AUTH": {
+    "LOGIN":            "Entrar",
+    "REGISTER":         "Criar Conta",
+    "LOGOUT":           "Terminar Sessão",
+    "FORGOT_PASSWORD":  "Esqueci a Senha",
+    "RESET_PASSWORD":   "Redefinir Senha",
+    "EMAIL":            "Email",
+    "PASSWORD":         "Senha",
+    "NAME":             "Nome",
+    "CONFIRM_PASSWORD": "Confirmar Senha",
+    "REMEMBER_ME":      "Lembrar-me",
+    "NO_ACCOUNT":       "Não tem conta?",
+    "HAS_ACCOUNT":      "Já tem conta?",
+    "BACK_TO_LOGIN":    "Voltar ao login"
+  },
+  "DASHBOARD": {
+    "TITLE":           "Dashboard",
+    "GREETING_MORNING":"Bom dia",
+    "GREETING_AFTERNOON":"Boa tarde",
+    "GREETING_EVENING": "Boa noite",
+    "TOTAL_BALANCE":   "Saldo Total",
+    "INCOME":          "Receitas",
+    "EXPENSES":        "Despesas",
+    "SAVINGS_RATE":    "Taxa de Poupança",
+    "RECENT_TX":       "Últimas Transações",
+    "VIEW_ALL":        "Ver todas",
+    "EVOLUTION":       "Evolução Mensal",
+    "BY_CATEGORY":     "Por Categoria"
+  },
+  "TRANSACTIONS": {
+    "TITLE":       "Transações",
+    "NEW":         "Nova Transação",
+    "INCOME":      "Receita",
+    "EXPENSE":     "Despesa",
+    "TRANSFER":    "Transferência",
+    "DESCRIPTION": "Descrição",
+    "AMOUNT":      "Valor",
+    "DATE":        "Data",
+    "CATEGORY":    "Categoria",
+    "ACCOUNT":     "Conta",
+    "NOTES":       "Notas",
+    "EXPORT_CSV":  "Exportar CSV",
+    "NO_RESULTS":  "Sem transações"
+  },
+  "ACCOUNTS": {
+    "TITLE":        "Contas",
+    "NEW":          "Nova Conta",
+    "CHECKING":     "Conta Corrente",
+    "SAVINGS":      "Poupança",
+    "CREDIT":       "Crédito",
+    "INVESTMENT":   "Investimento",
+    "CASH":         "Dinheiro",
+    "BALANCE":      "Saldo",
+    "BANK_NAME":    "Banco",
+    "TOTAL_BALANCE":"Saldo Total"
+  },
+  "CATEGORIES": {
+    "TITLE": "Categorias",
+    "NEW":   "Nova Categoria",
+    "TYPE":  "Tipo",
+    "ICON":  "Ícone",
+    "COLOR": "Cor",
+    "ALL":   "Todas"
+  },
+  "BUDGET": {
+    "TITLE":      "Orçamento",
+    "NEW":        "Novo Orçamento",
+    "LIMIT":      "Limite",
+    "SPENT":      "Gasto",
+    "REMAINING":  "Disponível",
+    "USAGE":      "Utilização",
+    "OVER_BUDGET":"Excedido",
+    "ATTENTION":  "Atenção"
+  },
+  "GOALS": {
+    "TITLE":       "Metas",
+    "NEW":         "Nova Meta",
+    "TARGET":      "Valor Alvo",
+    "CURRENT":     "Valor Atual",
+    "DEADLINE":    "Prazo",
+    "PROGRESS":    "Progresso",
+    "CONTRIBUTE":  "Poupar",
+    "ACTIVE":      "Ativa",
+    "COMPLETED":   "Concluída",
+    "CANCELLED":   "Cancelada"
+  },
+  "REPORTS": {
+    "TITLE":       "Relatórios",
+    "EXPORT_PDF":  "Exportar PDF",
+    "EXPORT_CSV":  "Exportar CSV",
+    "EVOLUTION":   "Evolução",
+    "BY_CATEGORY": "Por Categoria",
+    "MONTHLY":     "Mensal",
+    "ANNUAL":      "Anual"
+  },
+  "SETTINGS": {
+    "TITLE":       "Configurações",
+    "PROFILE":     "Perfil",
+    "PREFERENCES": "Preferências",
+    "SECURITY":    "Segurança",
+    "THEME":       "Tema",
+    "LANGUAGE":    "Idioma",
+    "CURRENCY":    "Moeda",
+    "SAVE":        "Guardar"
+  },
+  "COMMON": {
+    "SAVE":       "Guardar",
+    "CANCEL":     "Cancelar",
+    "DELETE":     "Eliminar",
+    "EDIT":       "Editar",
+    "CREATE":     "Criar",
+    "LOADING":    "A carregar...",
+    "SAVING":     "A guardar...",
+    "SUCCESS":    "Sucesso",
+    "ERROR":      "Erro",
+    "CONFIRM":    "Confirmar",
+    "CLOSE":      "Fechar",
+    "SEARCH":     "Pesquisar",
+    "FILTER":     "Filtrar",
+    "CLEAR":      "Limpar",
+    "PREVIOUS":   "Anterior",
+    "NEXT":       "Próxima",
+    "NO_DATA":    "Sem dados",
+    "REQUIRED":   "Campo obrigatório",
+    "INVALID_EMAIL": "Email inválido"
+  }
+}
