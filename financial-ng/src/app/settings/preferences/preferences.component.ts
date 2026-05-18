@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ThemeService } from '../../core/services/theme.service';
 import { ToastService } from '../../core/services/toast.service';
+import { TranslateService } from '@ngx-translate/core';
 import { STORAGE_KEYS } from '../../core/constants/api.constants';
 
 @Component({
@@ -146,6 +147,7 @@ import { STORAGE_KEYS } from '../../core/constants/api.constants';
 export class PreferencesComponent {
   theme = inject(ThemeService);
   private toast = inject(ToastService);
+  private translate = inject(TranslateService);
 
   language   = localStorage.getItem(STORAGE_KEYS.LANGUAGE) ?? 'pt';
   currency   = localStorage.getItem('fp_currency') ?? 'EUR';
@@ -158,7 +160,7 @@ export class PreferencesComponent {
     { key: 'large_tx',        label: 'Transações de Valor Alto', desc: 'Alertar quando há transações acima de €500', enabled: true },
   ];
 
-  saveLang():       void { localStorage.setItem(STORAGE_KEYS.LANGUAGE, this.language); }
+  saveLang():       void { localStorage.setItem(STORAGE_KEYS.LANGUAGE, this.language); this.translate.use(this.language); }
   saveCurrency():   void { localStorage.setItem('fp_currency', this.currency); }
   saveDateFormat(): void { localStorage.setItem('fp_date_format', this.dateFormat); }
   saveNotification(n: any): void { localStorage.setItem('fp_notif_' + n.key, String(n.enabled)); }

@@ -88,7 +88,7 @@ class AuthService
         $expiresAt = date('Y-m-d H:i:s', time() + 3600); // 1 hour
 
         $this->userRepo->storeResetToken($user['id'], $token, $expiresAt);
-       // $this->mailer->sendPasswordReset($user['email'], $user['name'], $token);
+        $this->mailer->sendPasswordReset($user['email'], $user['name'], $token);
 
         $this->logger->info("Password reset requested for: {$user['email']}");
     }

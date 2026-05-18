@@ -136,26 +136,7 @@ class DashboardService
             return ['error' => 'Invalid month format'];
         }
 
-        $rows = $this->transactionRepo->byCategory($userId, $year, $monthNum);
-        
-        $totalIncome = 0;
-        $totalExpense = 0;
-        
-        foreach ($rows as $row) {
-            $amount = (float) $row['total'];
-            if ($row['type'] === 'income') {
-                $totalIncome += $amount;
-            } else {
-                $totalExpense += $amount;
-            }
-        }
-
-        return [
-            'month'    => $month,
-            'categories' => $rows,
-            'total_income' => $totalIncome,
-            'total_expense' => $totalExpense,
-        ];
+        return $this->transactionRepo->byCategory($userId, $year, $monthNum);
     }
 
 

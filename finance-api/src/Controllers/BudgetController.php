@@ -21,10 +21,7 @@ class BudgetController extends BaseController
             $payload = $this->auth->authenticate();
             $month   = $this->queryParam('month', date('Y-m'));
             $data    = $this->dashService->getByCategory($payload['sub'], $month);
-            jsonResponse([
-                'success' => true,
-                'data'    => $data,
-            ]);
+            jsonResponse($data);
         } catch (\Throwable $e) { $this->handleException($e); }
     }
 

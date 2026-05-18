@@ -210,7 +210,7 @@ import { pt } from 'date-fns/locale';
     .remaining { font-size:.8rem; font-weight:600; }
     .remaining.danger { color:var(--clr-danger); }
 
-    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--bg-surface); border-radius:var(--radius-xl); width:100%; max-width:440px; box-shadow:var(--shadow-lg); z-index:200; overflow:hidden; }
+    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--bg-surface); border-radius:var(--radius-xl); width:100%; max-width:440px; max-height:calc(100vh - 48px); box-shadow:var(--shadow-lg); z-index:200; overflow-y:auto; }
     .modal-header { display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); }
     .modal-header h3 { font-size:1.0625rem; font-weight:700; }
     .modal-body { padding:1.5rem; }

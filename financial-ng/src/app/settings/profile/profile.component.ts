@@ -169,7 +169,13 @@ export class ProfileComponent implements OnInit {
     const fd = new FormData();
     fd.append('avatar', file);
     this.http.post<any>(API.USERS.AVATAR, fd).subscribe({
-      next: r => { this.toast.success('Avatar atualizado!'); if (r.data?.user) this.auth.updateUser(r.data.user); },
+      next: r => {
+        this.toast.success('Avatar atualizado!');
+        if (r.data) {
+          this.auth.updateUser(r.data);
+          this.avatarPreview.set(r.data.avatar ?? this.avatarPreview());
+        }
+      },
       error: () => this.toast.error('Erro ao atualizar avatar'),
     });
   }
@@ -178,7 +184,13 @@ export class ProfileComponent implements OnInit {
     if (this.form.invalid) return;
     this.saving.set(true);
     this.http.put<any>(API.AUTH.ME, this.form.value).subscribe({
-      next: r => { this.toast.success('Perfil atualizado!'); if (r.data?.user) this.auth.updateUser(r.data.user); this.saving.set(false); },
+      next: r => {
+        this.toast.success('Perfil atualizado!');
+        if (r.data) {
+          this.auth.updateUser(r.data);
+        }
+        this.saving.set(false);
+      },
       error: () => this.saving.set(false),
     });
   }

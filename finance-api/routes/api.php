@@ -107,6 +107,7 @@ $router->delete('/api/categories/{id}', [CategoryController::class, 'destroy']);
 // DELETE /api/transactions/{id}
 // ─────────────────────────────────────────────────────────────────────────────
 $router->get(   '/api/transactions/summary',     [TransactionController::class, 'summary']);
+$router->get(   '/api/transactions/export',      [TransactionController::class, 'export']);
 $router->get(   '/api/transactions/by-category', [TransactionController::class, 'byCategory']);
 $router->get(   '/api/transactions/evolution',   [TransactionController::class, 'evolution']);
 $router->get(   '/api/transactions',             [TransactionController::class, 'index']);
