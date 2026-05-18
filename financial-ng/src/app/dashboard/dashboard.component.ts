@@ -473,15 +473,7 @@ export class DashboardComponent implements OnInit {
 
     this.loadingCategory.set(true);
     this.dashSvc.byCategory(this.selectedMonth).subscribe({
-      next: r => {
-        const categories = Array.isArray(r.data)
-          ? r.data
-          : Array.isArray((r.data as any)?.categories)
-            ? (r.data as any).categories
-            : [];
-        this.categoryData.set(categories);
-        this.loadingCategory.set(false);
-      },
+      next: r => { this.categoryData.set(r.data ?? []); this.loadingCategory.set(false); },
       error: () => this.loadingCategory.set(false),
     });
 

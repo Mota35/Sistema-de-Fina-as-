@@ -116,39 +116,42 @@ import { pt } from 'date-fns/locale';
 
     <!-- Modal -->
     @if (showModal()) {
-      <div class="overlay" (click)="closeModal()"></div>
-      <div class="modal animate-scale-in">
-        <div class="modal-header">
-          <h3>{{ editMode() ? 'Editar Orçamento' : 'Novo Orçamento' }}</h3>
-          <button class="btn btn-ghost btn-icon" (click)="closeModal()">✕</button>
+      <div class="overlay" (click)="$event.target === $event.currentTarget && closeModal()">
+        <div class="modal animate-scale-in">
+          <div class="modal-header">
+            <h3>{{ editMode() ? 'Editar Orçamento' : 'Novo Orçamento' }}</h3>
+            <button class="btn btn-ghost btn-icon" (click)="closeModal()">✕</button>
+          </div>
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <div class="modal-body">
+              <div class="form-group">
+                <label class="form-label">Categoria *</label>
+                <select class="form-control" formControlName="category_id">
+                  <option value="">Selecionar categoria</option>
+                  @for (cat of expenseCategories(); track cat.id) {
+                    <option [value]="cat.id">{{ cat.icon }} {{ cat.name }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-group" style="margin-top:1rem">
+                <label class="form-label">Limite (€) *</label>
+                <input class="form-control" type="number" step="0.01" min="1"
+                       formControlName="amount" placeholder="Ex: 500.00">
+              </div>
+              <div class="form-group" style="margin-top:1rem">
+                <label class="form-label">Mês</label>
+                <input class="form-control" type="month" formControlName="month">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline" (click)="closeModal()">Cancelar</button>
+              <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">
+                @if (saving()) { <span class="spinner-sm"></span> }
+                {{ editMode() ? 'Guardar' : 'Criar Orçamento' }}
+              </button>
+            </div>
+          </form>
         </div>
-        <form [formGroup]="form" (ngSubmit)="submit()" class="modal-body">
-          <div class="form-group">
-            <label class="form-label">Categoria *</label>
-            <select class="form-control" formControlName="category_id">
-              <option value="">Selecionar categoria</option>
-              @for (cat of expenseCategories(); track cat.id) {
-                <option [value]="cat.id">{{ cat.icon }} {{ cat.name }}</option>
-              }
-            </select>
-          </div>
-          <div class="form-group" style="margin-top:1rem">
-            <label class="form-label">Limite (€) *</label>
-            <input class="form-control" type="number" step="0.01" min="1"
-                   formControlName="amount" placeholder="Ex: 500.00">
-          </div>
-          <div class="form-group" style="margin-top:1rem">
-            <label class="form-label">Mês</label>
-            <input class="form-control" type="month" formControlName="month">
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline" (click)="closeModal()">Cancelar</button>
-            <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">
-              @if (saving()) { <span class="spinner-sm"></span> }
-              {{ editMode() ? 'Guardar' : 'Criar Orçamento' }}
-            </button>
-          </div>
-        </form>
       </div>
     }
 
@@ -210,13 +213,9 @@ import { pt } from 'date-fns/locale';
     .remaining { font-size:.8rem; font-weight:600; }
     .remaining.danger { color:var(--clr-danger); }
 
-    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--bg-surface); border-radius:var(--radius-xl); width:100%; max-width:440px; max-height:calc(100vh - 48px); box-shadow:var(--shadow-lg); z-index:200; overflow-y:auto; }
-    .modal-header { display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); }
     .modal-header h3 { font-size:1.0625rem; font-weight:700; }
-    .modal-body { padding:1.5rem; }
-    .modal-footer { display:flex; justify-content:flex-end; gap:.75rem; margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid var(--border); }
-
-    .confirm-dialog { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--bg-surface); border-radius:var(--radius-xl); padding:2rem; width:100%; max-width:380px; text-align:center; box-shadow:var(--shadow-lg); z-index:200; }
+    
+    .confirm-dialog { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--bg-surface); border-radius:var(--radius-xl); padding:2rem; width:100%; max-width:380px; text-align:center; box-shadow:var(--shadow-lg); z-index:2000; }
     .confirm-icon { font-size:2.5rem; margin-bottom:1rem; }
     .confirm-dialog h3 { font-size:1.125rem; font-weight:700; margin-bottom:.5rem; }
     .confirm-dialog p { color:var(--text-secondary); font-size:.9rem; margin-bottom:1.5rem; }
@@ -265,14 +264,14 @@ export class BudgetListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.catSvc.list().subscribe({ next: r => this.categories.set(r.data) });
+    this.catSvc.list().subscribe({ next: r => this.categories.set(r.data ?? []) });
     this.load();
   }
 
   load(): void {
     this.loading.set(true);
     this.svc.list(this.selectedMonth).subscribe({
-      next: r => { this.budgets.set(r.data); this.loading.set(false); },
+      next: r => { this.budgets.set(r.data ?? []); this.loading.set(false); },
       error: () => this.loading.set(false),
     });
   }

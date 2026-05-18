@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { UploadHelper } from '../../core/services/upload.helper';
-import { API } from '../../core/constants/api.constants';
+import { API, STORAGE_BASE } from '../../core/constants/api.constants';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -31,11 +31,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <!-- Avatar Section -->
         <div class="card avatar-section">
           <div class="avatar-wrap">
-            @if (avatarPreview()) {
-              <img [src]="avatarPreview()" alt="Avatar" class="avatar-img">
-            } @else {
-              <div class="avatar-placeholder">{{ auth.user()?.name?.[0]?.toUpperCase() }}</div>
-            }
+            <img [src]="getFullAvatarUrl(avatarPreview())" alt="Avatar" class="avatar-img">
             <label class="avatar-overlay" for="avatar-input">
               📷
               <input id="avatar-input" type="file" accept="image/*" hidden (change)="onAvatarChange($event)">
@@ -163,20 +159,29 @@ export class ProfileComponent implements OnInit {
   onAvatarChange(e: Event): void {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
+
+    // Pré-visualização imediata
     const reader = new FileReader();
     reader.onload = ev => this.avatarPreview.set(ev.target?.result as string);
     reader.readAsDataURL(file);
+
     const fd = new FormData();
     fd.append('avatar', file);
+
     this.http.post<any>(API.USERS.AVATAR, fd).subscribe({
       next: r => {
         this.toast.success('Avatar atualizado!');
-        if (r.data) {
-          this.auth.updateUser(r.data);
-          this.avatarPreview.set(r.data.avatar ?? this.avatarPreview());
+        // Actualizar o utilizador no serviço de auth com o novo avatar
+        const user = this.auth.user();
+        if (user && r.data?.path) {
+          this.auth.updateUser({ ...user, avatar: r.data.path });
         }
       },
-      error: () => this.toast.error('Erro ao atualizar avatar'),
+      error: err => {
+        this.toast.error('Erro ao atualizar avatar', err.error?.message);
+        // Reverter pré-visualização se falhou
+        this.avatarPreview.set(this.auth.user()?.avatar ?? '');
+      },
     });
   }
 
@@ -200,5 +205,11 @@ export class ProfileComponent implements OnInit {
       next: () => { this.auth.logout(); },
       error: () => this.toast.error('Erro ao eliminar conta'),
     });
+  }
+
+  getFullAvatarUrl(path: string): string {
+    if (!path) return 'assets/images/default-avatar.png';
+    if (path.startsWith('data:') || path.startsWith('http')) return path;
+    return `${STORAGE_BASE}/${path}`;
   }
 }

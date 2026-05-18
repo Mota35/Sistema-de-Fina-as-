@@ -105,67 +105,71 @@ const GOAL_ICONS = ['🎯','🏠','🚗','✈️','💍','🎓','💻','🏖️'
 
     <!-- Create/Edit Modal -->
     @if (showModal()) {
-      <div class="overlay" (click)="closeModal()"></div>
-      <div class="modal animate-scale-in">
-        <div class="modal-header">
-          <h3>{{ editMode() ? 'Editar Meta' : 'Nova Meta' }}</h3>
-          <button class="btn btn-ghost btn-icon" (click)="closeModal()">✕</button>
-        </div>
-        <form [formGroup]="form" (ngSubmit)="submit()" class="modal-body">
-          <div class="form-group">
-            <label class="form-label">Nome da Meta *</label>
-            <input class="form-control" formControlName="name" placeholder="Ex: Fundo de emergência">
+      <div class="overlay" (click)="$event.target === $event.currentTarget && closeModal()">
+        <div class="modal animate-scale-in">
+          <div class="modal-header">
+            <h3>{{ editMode() ? 'Editar Meta' : 'Nova Meta' }}</h3>
+            <button class="btn btn-ghost btn-icon" (click)="closeModal()">✕</button>
           </div>
-          <div class="form-group" style="margin-top:1rem">
-            <label class="form-label">Valor Alvo (€) *</label>
-            <input class="form-control" type="number" step="0.01" min="1"
-                   formControlName="target_amount" placeholder="Ex: 10000.00">
-          </div>
-          <div class="form-group" style="margin-top:1rem">
-            <label class="form-label">Valor Atual (€)</label>
-            <input class="form-control" type="number" step="0.01" min="0"
-                   formControlName="current_amount" placeholder="0.00">
-          </div>
-          <div class="form-group" style="margin-top:1rem">
-            <label class="form-label">Prazo</label>
-            <input class="form-control" type="date" formControlName="deadline">
-          </div>
-          <div class="form-group" style="margin-top:1rem">
-            <label class="form-label">Ícone</label>
-            <div class="icon-grid">
-              @for (ic of goalIcons; track ic) {
-                <button type="button" class="icon-btn" [class.selected]="form.value.icon === ic"
-                        (click)="form.patchValue({icon: ic})">{{ ic }}</button>
-              }
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <div class="modal-body">
+              <div class="form-group">
+                <label class="form-label">Nome da Meta *</label>
+                <input class="form-control" formControlName="name" placeholder="Ex: Fundo de emergência">
+              </div>
+              <div class="form-group" style="margin-top:1rem">
+                <label class="form-label">Valor Alvo (€) *</label>
+                <input class="form-control" type="number" step="0.01" min="1"
+                       formControlName="target_amount" placeholder="Ex: 10000.00">
+              </div>
+              <div class="form-group" style="margin-top:1rem">
+                <label class="form-label">Valor Atual (€)</label>
+                <input class="form-control" type="number" step="0.01" min="0"
+                       formControlName="current_amount" placeholder="0.00">
+              </div>
+              <div class="form-group" style="margin-top:1rem">
+                <label class="form-label">Prazo</label>
+                <input class="form-control" type="date" formControlName="deadline">
+              </div>
+              <div class="form-group" style="margin-top:1rem">
+                <label class="form-label">Ícone</label>
+                <div class="icon-grid">
+                  @for (ic of goalIcons; track ic) {
+                    <button type="button" class="icon-btn" [class.selected]="form.value.icon === ic"
+                            (click)="form.patchValue({icon: ic})">{{ ic }}</button>
+                  }
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline" (click)="closeModal()">Cancelar</button>
-            <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">
-              @if (saving()) { <span class="spinner-sm"></span> }
-              {{ editMode() ? 'Guardar' : 'Criar Meta' }}
-            </button>
-          </div>
-        </form>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline" (click)="closeModal()">Cancelar</button>
+              <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">
+                @if (saving()) { <span class="spinner-sm"></span> }
+                {{ editMode() ? 'Guardar' : 'Criar Meta' }}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     }
 
     <!-- Contribute Modal -->
     @if (contributeTarget()) {
-      <div class="overlay" (click)="contributeTarget.set(null)"></div>
-      <div class="modal animate-scale-in" style="max-width:380px">
-        <div class="modal-header">
-          <h3>💰 Adicionar Poupança</h3>
-          <button class="btn btn-ghost btn-icon" (click)="contributeTarget.set(null)">✕</button>
-        </div>
-        <div class="modal-body">
-          <p class="text-secondary" style="margin-bottom:1rem;font-size:.9rem">
-            Meta: <strong>{{ contributeTarget()?.name }}</strong>
-          </p>
-          <div class="form-group">
-            <label class="form-label">Valor a Poupar (€)</label>
-            <input class="form-control" type="number" step="0.01" min="0.01"
-                   [(ngModel)]="contributeAmount" placeholder="Ex: 100.00">
+      <div class="overlay" (click)="$event.target === $event.currentTarget && contributeTarget.set(null)">
+        <div class="modal animate-scale-in" style="max-width:380px">
+          <div class="modal-header">
+            <h3>💰 Adicionar Poupança</h3>
+            <button class="btn btn-ghost btn-icon" (click)="contributeTarget.set(null)">✕</button>
+          </div>
+          <div class="modal-body">
+            <p class="text-secondary" style="margin-bottom:1rem;font-size:.9rem">
+              Meta: <strong>{{ contributeTarget()?.name }}</strong>
+            </p>
+            <div class="form-group">
+              <label class="form-label">Valor a Poupar (€)</label>
+              <input class="form-control" type="number" step="0.01" min="0.01"
+                     [(ngModel)]="contributeAmount" placeholder="Ex: 100.00">
+            </div>
           </div>
           <div class="modal-footer">
             <button class="btn btn-outline" (click)="contributeTarget.set(null)">Cancelar</button>
@@ -180,14 +184,15 @@ const GOAL_ICONS = ['🎯','🏠','🚗','✈️','💍','🎓','💻','🏖️'
 
     <!-- Delete Confirm -->
     @if (deleteTarget()) {
-      <div class="overlay" (click)="deleteTarget.set(null)"></div>
-      <div class="confirm-dialog animate-scale-in">
-        <div class="confirm-icon">🎯</div>
-        <h3>Eliminar Meta</h3>
-        <p>Tem a certeza que quer eliminar a meta <strong>"{{ deleteTarget()?.name }}"</strong>?</p>
-        <div class="confirm-btns">
-          <button class="btn btn-outline" (click)="deleteTarget.set(null)">Cancelar</button>
-          <button class="btn btn-danger" (click)="confirmDelete()" [disabled]="saving()">Eliminar</button>
+      <div class="overlay" (click)="$event.target === $event.currentTarget && deleteTarget.set(null)">
+        <div class="confirm-dialog animate-scale-in">
+          <div class="confirm-icon">🎯</div>
+          <h3>Eliminar Meta</h3>
+          <p>Tem a certeza que quer eliminar a meta <strong>"{{ deleteTarget()?.name }}"</strong>?</p>
+          <div class="confirm-btns">
+            <button class="btn btn-outline" (click)="deleteTarget.set(null)">Cancelar</button>
+            <button class="btn btn-danger" (click)="confirmDelete()" [disabled]="saving()">Eliminar</button>
+          </div>
         </div>
       </div>
     }

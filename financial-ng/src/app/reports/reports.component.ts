@@ -258,15 +258,7 @@ export class ReportsComponent implements OnInit {
 
     this.loadingCat.set(true);
     this.dashSvc.byCategory(this.selectedMonth).subscribe({
-      next: r => {
-        const categories = Array.isArray(r.data)
-          ? r.data
-          : Array.isArray((r.data as any)?.categories)
-            ? (r.data as any).categories
-            : [];
-        this.categoryData.set(categories);
-        this.loadingCat.set(false);
-      },
+      next: r => { this.categoryData.set(r.data ?? []); this.loadingCat.set(false); },
       error: () => this.loadingCat.set(false),
     });
   }

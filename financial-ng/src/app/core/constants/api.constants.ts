@@ -1,4 +1,5 @@
 export const API_BASE = 'http://localhost/finance-api/public/api';
+export const STORAGE_BASE = 'http://localhost/finance-api/public';
 
 export const API = {
   AUTH: {
@@ -12,7 +13,7 @@ export const API = {
   },
   USERS: {
     BASE:   `${API_BASE}/users`,
-    AVATAR: `${API_BASE}/users/avatar`,
+    AVATAR: `${API_BASE}/profile/avatar`,  // ← era /users/avatar
     BY_ID:  (id: number) => `${API_BASE}/users/${id}`,
   },
   ACCOUNTS: {

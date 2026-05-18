@@ -153,71 +153,75 @@ import { Transaction, Category, TransactionFilters } from '../../core/models';
 
     <!-- ─── Modal ─── -->
     @if (showModal()) {
-      <div class="overlay" (click)="closeModal()"></div>
-      <div class="modal animate-scale-in">
-        <div class="modal-header">
-          <h3>{{ editMode() ? 'Editar Transação' : 'Nova Transação' }}</h3>
-          <button class="btn btn-ghost btn-icon" (click)="closeModal()">✕</button>
+      <div class="overlay" (click)="$event.target === $event.currentTarget && closeModal()">
+        <div class="modal animate-scale-in">
+          <div class="modal-header">
+            <h3>{{ editMode() ? 'Editar Transação' : 'Nova Transação' }}</h3>
+            <button class="btn btn-ghost btn-icon" (click)="closeModal()">✕</button>
+          </div>
+
+          <form [formGroup]="txForm" (ngSubmit)="submitTx()">
+            <div class="modal-body">
+              <div class="modal-grid">
+                <div class="form-group span-2">
+                  <label class="form-label">Descrição *</label>
+                  <input class="form-control" formControlName="description" placeholder="Ex: Supermercado">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tipo *</label>
+                  <select class="form-control" formControlName="type">
+                    <option value="income">💚 Receita</option>
+                    <option value="expense">❤️ Despesa</option>
+                    <option value="transfer">💙 Transferência</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Valor *</label>
+                  <input class="form-control" type="number" step="0.01" min="0" formControlName="amount" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Data *</label>
+                  <input class="form-control" type="date" formControlName="date">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Categoria</label>
+                  <select class="form-control" formControlName="category_id">
+                    <option value="">Sem categoria</option>
+                    @for (cat of categories(); track cat.id) {
+                      <option [value]="cat.id">{{ cat.icon }} {{ cat.name }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="form-group span-2">
+                  <label class="form-label">Notas</label>
+                  <textarea class="form-control" formControlName="notes" rows="2" placeholder="Observações opcionais..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline" (click)="closeModal()">Cancelar</button>
+              <button type="submit" class="btn btn-primary" [disabled]="txForm.invalid || saving()">
+                @if (saving()) { <span class="spinner-sm"></span> } 
+                {{ editMode() ? 'Guardar' : 'Criar Transação' }}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <form [formGroup]="txForm" (ngSubmit)="submitTx()" class="modal-body">
-          <div class="modal-grid">
-            <div class="form-group span-2">
-              <label class="form-label">Descrição *</label>
-              <input class="form-control" formControlName="description" placeholder="Ex: Supermercado">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Tipo *</label>
-              <select class="form-control" formControlName="type">
-                <option value="income">💚 Receita</option>
-                <option value="expense">❤️ Despesa</option>
-                <option value="transfer">💙 Transferência</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Valor *</label>
-              <input class="form-control" type="number" step="0.01" min="0" formControlName="amount" placeholder="0.00">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Data *</label>
-              <input class="form-control" type="date" formControlName="date">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Categoria</label>
-              <select class="form-control" formControlName="category_id">
-                <option value="">Sem categoria</option>
-                @for (cat of categories(); track cat.id) {
-                  <option [value]="cat.id">{{ cat.icon }} {{ cat.name }}</option>
-                }
-              </select>
-            </div>
-            <div class="form-group span-2">
-              <label class="form-label">Notas</label>
-              <textarea class="form-control" formControlName="notes" rows="2" placeholder="Observações opcionais..."></textarea>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline" (click)="closeModal()">Cancelar</button>
-            <button type="submit" class="btn btn-primary" [disabled]="txForm.invalid || saving()">
-              @if (saving()) { <span class="spinner-sm"></span> } 
-              {{ editMode() ? 'Guardar' : 'Criar Transação' }}
-            </button>
-          </div>
-        </form>
       </div>
     }
 
     <!-- Confirm Delete -->
     @if (deleteTarget()) {
-      <div class="overlay" (click)="deleteTarget.set(null)"></div>
-      <div class="confirm-dialog animate-scale-in">
-        <div class="confirm-icon">🗑️</div>
-        <h3>Eliminar Transação</h3>
-        <p>Tem a certeza que quer eliminar <strong>"{{ deleteTarget()?.description }}"</strong>? Esta ação não pode ser desfeita.</p>
-        <div class="confirm-btns">
-          <button class="btn btn-outline" (click)="deleteTarget.set(null)">Cancelar</button>
-          <button class="btn btn-danger" (click)="confirmDelete()" [disabled]="saving()">Eliminar</button>
+      <div class="overlay" (click)="$event.target === $event.currentTarget && deleteTarget.set(null)">
+        <div class="confirm-dialog animate-scale-in">
+          <div class="confirm-icon">🗑️</div>
+          <h3>Eliminar Transação</h3>
+          <p>Tem a certeza que quer eliminar <strong>"{{ deleteTarget()?.description }}"</strong>? Esta ação não pode ser desfeita.</p>
+          <div class="confirm-btns">
+            <button class="btn btn-outline" (click)="deleteTarget.set(null)">Cancelar</button>
+            <button class="btn btn-danger" (click)="confirmDelete()" [disabled]="saving()">Eliminar</button>
+          </div>
         </div>
       </div>
     }
@@ -320,8 +324,8 @@ export class TransactionsListComponent implements OnInit {
     this.loading.set(true);
     this.txSvc.list(this.filters).subscribe({
       next: r => {
-        this.transactions.set(r.data);
-        this.total.set(r.meta?.pagination.total ?? 0);
+        this.transactions.set(r.data ?? []);
+        this.total.set(r.meta?.pagination?.total ?? 0);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

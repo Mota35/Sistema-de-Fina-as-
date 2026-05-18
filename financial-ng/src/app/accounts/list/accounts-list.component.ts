@@ -88,73 +88,75 @@ const ACCOUNT_META: Record<string, { icon: string; label: string; color: string 
 
     <!-- Modal -->
     @if (showModal()) {
-      <div class="overlay" (click)="closeModal()"></div>
-      <div class="modal animate-scale-in">
-        <div class="modal-header">
-          <h3>{{ editMode() ? 'Editar Conta' : 'Nova Conta' }}</h3>
-          <button class="btn btn-ghost btn-icon" (click)="closeModal()">✕</button>
+      <div class="overlay" (click)="$event.target === $event.currentTarget && closeModal()">
+        <div class="modal animate-scale-in">
+          <div class="modal-header">
+            <h3>{{ editMode() ? 'Editar Conta' : 'Nova Conta' }}</h3>
+            <button class="btn btn-ghost btn-icon" (click)="closeModal()">✕</button>
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="submit()" class="modal-body">
+            <div class="form-grid">
+              <div class="form-group span-2">
+                <label class="form-label">Nome da Conta *</label>
+                <input class="form-control" [class.error]="hasError('name')"
+                       formControlName="name" placeholder="Ex: Conta Principal BCP">
+                @if (hasError('name')) { <span class="form-error">⚠ Campo obrigatório</span> }
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Tipo *</label>
+                <select class="form-control" formControlName="type">
+                  @for (t of accountTypes; track t.value) {
+                    <option [value]="t.value">{{ t.icon }} {{ t.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Saldo Inicial (€)</label>
+                <input class="form-control" type="number" step="0.01"
+                       formControlName="balance" placeholder="0.00">
+              </div>
+
+              <div class="form-group span-2">
+                <label class="form-label">Banco / Instituição</label>
+                <input class="form-control" formControlName="bank_name"
+                       placeholder="Ex: Caixa Geral de Depósitos">
+              </div>
+
+              <div class="form-group span-2">
+                <label class="checkbox-row">
+                  <input type="checkbox" formControlName="is_active">
+                  <span>Conta ativa</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline" (click)="closeModal()">Cancelar</button>
+              <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">
+                @if (saving()) { <span class="spinner-sm"></span> }
+                {{ editMode() ? 'Guardar' : 'Criar Conta' }}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <form [formGroup]="form" (ngSubmit)="submit()" class="modal-body">
-          <div class="form-grid">
-            <div class="form-group span-2">
-              <label class="form-label">Nome da Conta *</label>
-              <input class="form-control" [class.error]="hasError('name')"
-                     formControlName="name" placeholder="Ex: Conta Principal BCP">
-              @if (hasError('name')) { <span class="form-error">⚠ Campo obrigatório</span> }
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Tipo *</label>
-              <select class="form-control" formControlName="type">
-                @for (t of accountTypes; track t.value) {
-                  <option [value]="t.value">{{ t.icon }} {{ t.label }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Saldo Inicial (€)</label>
-              <input class="form-control" type="number" step="0.01"
-                     formControlName="balance" placeholder="0.00">
-            </div>
-
-            <div class="form-group span-2">
-              <label class="form-label">Banco / Instituição</label>
-              <input class="form-control" formControlName="bank_name"
-                     placeholder="Ex: Caixa Geral de Depósitos">
-            </div>
-
-            <div class="form-group span-2">
-              <label class="checkbox-row">
-                <input type="checkbox" formControlName="is_active">
-                <span>Conta ativa</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline" (click)="closeModal()">Cancelar</button>
-            <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">
-              @if (saving()) { <span class="spinner-sm"></span> }
-              {{ editMode() ? 'Guardar' : 'Criar Conta' }}
-            </button>
-          </div>
-        </form>
       </div>
     }
 
     <!-- Confirm Delete -->
     @if (deleteTarget()) {
-      <div class="overlay" (click)="deleteTarget.set(null)"></div>
-      <div class="confirm-dialog animate-scale-in">
-        <div class="confirm-icon">🏦</div>
-        <h3>Eliminar Conta</h3>
-        <p>Tem a certeza que quer eliminar a conta <strong>"{{ deleteTarget()?.name }}"</strong>?<br>
-           Esta ação pode afetar transações existentes.</p>
-        <div class="confirm-btns">
-          <button class="btn btn-outline" (click)="deleteTarget.set(null)">Cancelar</button>
-          <button class="btn btn-danger" (click)="confirmDelete()" [disabled]="saving()">Eliminar</button>
+      <div class="overlay" (click)="$event.target === $event.currentTarget && deleteTarget.set(null)">
+        <div class="confirm-dialog animate-scale-in">
+          <div class="confirm-icon">🏦</div>
+          <h3>Eliminar Conta</h3>
+          <p>Tem a certeza que quer eliminar a conta <strong>"{{ deleteTarget()?.name }}"</strong>?<br>
+             Esta ação pode afetar transações existentes.</p>
+          <div class="confirm-btns">
+            <button class="btn btn-outline" (click)="deleteTarget.set(null)">Cancelar</button>
+            <button class="btn btn-danger" (click)="confirmDelete()" [disabled]="saving()">Eliminar</button>
+          </div>
         </div>
       </div>
     }

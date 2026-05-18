@@ -160,13 +160,21 @@ export class PreferencesComponent {
     { key: 'large_tx',        label: 'Transações de Valor Alto', desc: 'Alertar quando há transações acima de €500', enabled: true },
   ];
 
-  saveLang():       void { localStorage.setItem(STORAGE_KEYS.LANGUAGE, this.language); this.translate.use(this.language); }
+  saveLang(): void {
+    localStorage.setItem(STORAGE_KEYS.LANGUAGE, this.language);
+    window.location.href = '/app/settings/preferences';  // ← força reload completo na rota certa
+  }
   saveCurrency():   void { localStorage.setItem('fp_currency', this.currency); }
   saveDateFormat(): void { localStorage.setItem('fp_date_format', this.dateFormat); }
   saveNotification(n: any): void { localStorage.setItem('fp_notif_' + n.key, String(n.enabled)); }
 
   saveAll(): void {
-    this.saveLang(); this.saveCurrency(); this.saveDateFormat();
+    this.saveCurrency();
+    this.saveDateFormat();
+    localStorage.setItem(STORAGE_KEYS.LANGUAGE, this.language);
     this.toast.success('Preferências guardadas!');
+    setTimeout(() => {
+      window.location.href = '/app/settings/preferences';
+    }, 800);
   }
 }
