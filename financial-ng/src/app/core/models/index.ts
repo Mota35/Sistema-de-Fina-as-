@@ -168,7 +168,36 @@ export interface CategorySummary {
   total: number;
   count: number;
 }
+export interface MarketTicker {
+  symbol: string;
+  name?: string;
+  price: number;
+  change: number;
+  change_percent?: number;
+  market_cap?: number;
+  currency?: string;
+  updated_at?: string;
+  note?: string;
+}
 
+export interface MarketSummary {
+  indices: MarketTicker[];
+  updated_at: string;
+}
+
+export interface ExchangeRates {
+  base: string;
+  date: string;
+  rates: Record<string, number>;
+}
+
+export interface StockQuote {
+  symbol: string;
+  name: string;
+  price: number;
+  changesPercentage: number;
+  change: number;
+}
 // ─── UI ──────────────────────────────────────────────────────────────────────
 
 export interface Toast {

@@ -2,13 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API } from '../constants/api.constants';
-import { ApiResponse, Account, Category, Budget, Goal, DashboardSummary, MonthlyEvolution, CategorySummary } from '../models';
+import { ApiResponse, Account, Category, Budget, Goal, DashboardSummary, MonthlyEvolution, CategorySummary, MarketTicker, MarketSummary, ExchangeRates, StockQuote } from '../models';
 
 // ─── Dashboard Service ────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   summary(month: string): Observable<ApiResponse<DashboardSummary>> {
     return this.http.get<ApiResponse<DashboardSummary>>(API.DASHBOARD.SUMMARY, { params: { month } });
@@ -27,7 +27,7 @@ export class DashboardService {
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   list(): Observable<ApiResponse<Account[]>> {
     return this.http.get<ApiResponse<Account[]>>(API.ACCOUNTS.BASE);
@@ -54,7 +54,7 @@ export class AccountService {
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   list(type?: string): Observable<ApiResponse<Category[]>> {
     const params = type ? new HttpParams().set('type', type) : undefined;
@@ -78,7 +78,7 @@ export class CategoryService {
 
 @Injectable({ providedIn: 'root' })
 export class BudgetService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   list(month: string): Observable<ApiResponse<Budget[]>> {
     return this.http.get<ApiResponse<Budget[]>>(API.BUDGETS.BASE, { params: { month } });
@@ -101,7 +101,7 @@ export class BudgetService {
 
 @Injectable({ providedIn: 'root' })
 export class GoalService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   list(): Observable<ApiResponse<Goal[]>> {
     return this.http.get<ApiResponse<Goal[]>>(API.GOALS.BASE);
@@ -121,5 +121,30 @@ export class GoalService {
 
   contribute(id: number, amount: number): Observable<ApiResponse<Goal>> {
     return this.http.post<ApiResponse<Goal>>(API.GOALS.CONTRIBUTE(id), { amount });
+  }
+}
+
+// ─── Finance Service ─────────────────────────────────────────────────────────
+
+@Injectable({ providedIn: 'root' })
+export class FinanceService {
+  private readonly http = inject(HttpClient);
+
+  getExchangeRates(base: string = 'AOA'): Observable<ApiResponse<ExchangeRates>> {
+    return this.http.get<ApiResponse<ExchangeRates>>(API.EXCHANGE.RATES, { params: { base } });
+  }
+
+  getMarketSummary(): Observable<ApiResponse<MarketSummary>> {
+    return this.http.get<ApiResponse<MarketSummary>>(API.FINANCE.MARKET);
+  }
+
+  getStockQuotes(symbols: string[] = ['AAPL', 'MSFT', 'GOOGL']): Observable<ApiResponse<MarketTicker[]>> {
+    const params = new HttpParams().set('symbols', symbols.join(','));
+    return this.http.get<ApiResponse<MarketTicker[]>>(API.FINANCE.QUOTES, { params });
+  }
+
+  cryptoPrices(symbols: string[] = ['BTC', 'ETH', 'BNB']): Observable<ApiResponse<MarketTicker[]>> {
+    const params = new HttpParams().set('symbols', symbols.join(','));
+    return this.http.get<ApiResponse<MarketTicker[]>>(API.FINANCE.CRYPTO, { params });
   }
 }

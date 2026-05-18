@@ -110,8 +110,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     .avatar-section { display:flex; align-items:center; gap:1.5rem; }
     .avatar-wrap { position:relative; flex-shrink:0; }
     .avatar-img { width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid var(--clr-primary); }
-    .avatar-placeholder { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,var(--clr-primary),#a78bfa); display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:700; color:#fff; }
-    .avatar-overlay { position:absolute; inset:0; border-radius:50%; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; font-size:1.25rem; cursor:pointer; opacity:0; transition:opacity var(--transition); }
+    .avatar-placeholder { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#a78bfa); display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:700; color:#fff; border:3px solid var(--border); }
+    .avatar-overlay { position:absolute; inset:0; border-radius:50%; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; font-size:1.25rem; cursor:pointer; opacity:0; transition:opacity var(--transition); z-index: 2; }
     .avatar-wrap:hover .avatar-overlay { opacity:1; }
     .avatar-info { display:flex; flex-direction:column; gap:.375rem; }
     .user-name-big { font-size:1.125rem; font-weight:700; }

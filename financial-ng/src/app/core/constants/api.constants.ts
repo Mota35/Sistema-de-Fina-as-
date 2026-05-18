@@ -1,5 +1,7 @@
-export const API_BASE = 'http://localhost/finance-api/public/api';
-export const STORAGE_BASE = 'http://localhost/finance-api/public';
+import { environment } from '../../../environments/environment';
+
+export const API_BASE = environment.apiUrl.replace(/\/$/, '');
+export const STORAGE_BASE = API_BASE.replace(/\/api$/, '');
 
 export const API = {
   AUTH: {
@@ -35,14 +37,22 @@ export const API = {
     BY_ID: (id: number) => `${API_BASE}/budgets/${id}`,
   },
   GOALS: {
-    BASE:  `${API_BASE}/goals`,
-    BY_ID: (id: number) => `${API_BASE}/goals/${id}`,
-    CONTRIBUTE: (id: number) => `${API_BASE}/goals/${id}/contribute`,
+    BASE:   `${API_BASE}/goals`,
+    BY_ID: (id: any) => `${API_BASE}/goals/${id}`,
+    CONTRIBUTE: (id: any) => `${API_BASE}/goals/${id}/contribute`,
   },
   DASHBOARD: {
     SUMMARY:   `${API_BASE}/dashboard/summary`,
     EVOLUTION: `${API_BASE}/dashboard/evolution`,
     CATEGORY:  `${API_BASE}/dashboard/by-category`,
+  },
+  FINANCE: {
+    MARKET:  `${API_BASE}/finance/market`,
+    CRYPTO:  `${API_BASE}/finance/crypto`,
+    QUOTES:  `${API_BASE}/finance/quotes`,
+  },
+  EXCHANGE: {
+    RATES: `${API_BASE}/exchange/rates`,
   },
   REPORTS: {
     MONTHLY: `${API_BASE}/reports/monthly`,

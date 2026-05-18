@@ -314,12 +314,21 @@ interface NavItem {
 
     .user-avatar {
       width: 36px; height: 36px;
-      background: linear-gradient(135deg, var(--clr-primary), #a78bfa);
+      background: #6366f1; /* Fallback solid color */
+      background: linear-gradient(135deg, #6366f1, #a78bfa);
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: .875rem; font-weight: 700;
       color: #fff;
       flex-shrink: 0;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.1);
+    }
+    .user-avatar.has-img { background: transparent; border-color: var(--border); }
+    .avatar-img-circle {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     .user-avatar.sm { width: 32px; height: 32px; font-size: .8rem; }
 

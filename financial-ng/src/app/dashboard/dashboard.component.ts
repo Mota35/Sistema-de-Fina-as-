@@ -2,9 +2,9 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule, CurrencyPipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DashboardService, AccountService } from '../core/services/domain.services';
+import { DashboardService, AccountService, FinanceService } from '../core/services/domain.services';
 import { AuthService } from '../core/services/auth.service';
-import { DashboardSummary, MonthlyEvolution, CategorySummary, Account, Transaction } from '../core/models';
+import { DashboardSummary, MonthlyEvolution, CategorySummary, Account, Transaction, MarketTicker, ExchangeRates, MarketSummary, StockQuote } from '../core/models';
 import { TransactionService } from '../core/services/transaction.service';
 import { format, subMonths } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -98,6 +98,76 @@ import { pt } from 'date-fns/locale';
         </div>
       }
 
+      <!-- ─── Market & Crypto Row ─── -->
+      <div class="market-row animate-fade-in">
+        <!-- Market Indices -->
+        <div class="card market-card">
+          <div class="card-head">
+            <div class="head-info">
+              <h3>🌍 Mercado Global</h3>
+              <span class="text-muted" style="font-size:.7rem">Atualizado: {{ marketUpdatedAt() || '---' }}</span>
+            </div>
+          </div>
+          @if (loadingMarket()) {
+            <div class="skeleton" style="height:60px;border-radius:12px"></div>
+          } @else {
+            <div class="market-tickers">
+              @for (idx of marketIndices(); track idx.symbol) {
+                <div class="ticker-item">
+                  <span class="ticker-sym">{{ idx.symbol }}</span>
+                  <span class="ticker-price">{{ idx.price | number:'1.2-2' }}</span>
+                  <span class="ticker-change" [class.up]="idx.change > 0" [class.down]="idx.change < 0">
+                    {{ idx.change > 0 ? '+' : '' }}{{ idx.change_percent | number:'1.2-2' }}%
+                  </span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Crypto Prices -->
+        <div class="card market-card">
+          <div class="card-head">
+            <h3>🪙 Criptomoedas (USD)</h3>
+          </div>
+          @if (loadingCrypto()) {
+            <div class="skeleton" style="height:60px;border-radius:12px"></div>
+          } @else {
+            <div class="market-tickers">
+              @for (coin of cryptoPrices(); track coin.symbol) {
+                <div class="ticker-item">
+                  <span class="ticker-sym">{{ coin.symbol }}</span>
+                  <span class="ticker-price">{{ coin.price | currency:'USD':'symbol':'1.0-0' }}</span>
+                  <span class="ticker-change" [class.up]="coin.change > 0" [class.down]="coin.change < 0">
+                    {{ coin.change > 0 ? '+' : '' }}{{ coin.change_percent | number:'1.1-1' }}%
+                  </span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ─── Exchange Rates Widget ─── -->
+      @if (exchangeRates()) {
+        <div class="card exchange-card animate-fade-in">
+          <div class="exchange-grid">
+            <div class="exch-item">
+              <span class="exch-label">💵 USD/AOA</span>
+              <span class="exch-value">{{ exchangeRates()?.rates?.['AOA'] | number:'1.2-2' }}</span>
+            </div>
+            <div class="exch-item">
+              <span class="exch-label">💶 EUR/AOA</span>
+              <span class="exch-value">{{ (exchangeRates()?.rates?.['AOA'] ?? 0) / (exchangeRates()?.rates?.['EUR'] ?? 1) | number:'1.2-2' }}</span>
+            </div>
+            <div class="exch-item">
+              <span class="exch-label">💹 EUR/USD</span>
+              <span class="exch-value">{{ exchangeRates()?.rates?.['USD'] | number:'1.3-3' }}</span>
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- ─── Charts Row ─── -->
       <div class="charts-row">
 
@@ -165,6 +235,86 @@ import { pt } from 'date-fns/locale';
             <div class="empty-state" style="padding:3rem 1rem">
               <div class="empty-state-icon">📊</div>
               <p class="empty-state-message">Sem dados para este mês</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="market-row">
+        <div class="card market-card">
+          <div class="card-head">
+            <h3>Índices de Mercado</h3>
+            <span class="text-secondary" style="font-size:.8rem">
+              @if (marketUpdatedAt()) { Atualizado em {{ marketUpdatedAt() | date:'dd/MM HH:mm':'pt' }} }
+            </span>
+          </div>
+
+          @if (loadingMarket()) {
+            <div style="display:grid;gap:.75rem">
+              @for (i of [1,2,3,4]; track i) {
+                <div class="skeleton" style="height:70px;border-radius:16px"></div>
+              }
+            </div>
+          } @else if (marketIndices().length) {
+            <div class="market-list">
+              @for (idx of marketIndices(); track idx.symbol) {
+                <div class="market-item">
+                  <div>
+                    <div class="market-symbol">{{ idx.symbol }}</div>
+                    <div class="market-name">{{ idx.name || 'Índice' }}</div>
+                  </div>
+                  <div class="market-values">
+                    <div class="market-price">{{ idx.price | number:'1.2-2':'pt' }} {{ idx.currency || 'USD' }}</div>
+                    <div class="market-change" [class.positive]="idx.change >= 0" [class.negative]="idx.change < 0">
+                      {{ idx.change >= 0 ? '+' : '' }}{{ idx.change | number:'1.2-2':'pt' }}
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-state" style="padding:1.5rem">
+              <div class="empty-state-icon">📉</div>
+              <p class="empty-state-message">Não foi possível carregar índices de mercado.</p>
+              <p class="text-muted">Verifique a ligação ao backend ou as chaves API.</p>
+            </div>
+          }
+        </div>
+
+        <div class="card market-card">
+          <div class="card-head">
+            <h3>Criptomoedas</h3>
+            <span class="text-secondary" style="font-size:.8rem">Principais cotações</span>
+          </div>
+
+          @if (loadingCrypto()) {
+            <div style="display:grid;gap:.75rem">
+              @for (i of [1,2,3]; track i) {
+                <div class="skeleton" style="height:70px;border-radius:16px"></div>
+              }
+            </div>
+          } @else if (cryptoPrices().length) {
+            <div class="market-list">
+              @for (crypto of cryptoPrices(); track crypto.symbol) {
+                <div class="market-item">
+                  <div>
+                    <div class="market-symbol">{{ crypto.symbol }}</div>
+                    <div class="market-name">{{ crypto.name || 'Cripto' }}</div>
+                  </div>
+                  <div class="market-values">
+                    <div class="market-price">{{ crypto.price | number:'1.2-2':'pt' }} {{ crypto.currency || 'USD' }}</div>
+                    <div class="market-change" [class.positive]="crypto.change >= 0" [class.negative]="crypto.change < 0">
+                      {{ crypto.change >= 0 ? '+' : '' }}{{ crypto.change | number:'1.2-2':'pt' }}
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-state" style="padding:1.5rem">
+              <div class="empty-state-icon">💱</div>
+              <p class="empty-state-message">Não foi possível carregar as criptomoedas.</p>
+              <p class="text-muted">Certifique-se de que está autenticado e que o backend está acessível.</p>
             </div>
           }
         </div>
@@ -288,6 +438,25 @@ import { pt } from 'date-fns/locale';
     .kpi-value { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: .5rem; }
     .kpi-trend { font-size: .8rem; }
 
+    /* Market Row */
+    .market-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .market-card { padding: 1rem 1.25rem !important; }
+    .market-tickers { display: flex; gap: 1.5rem; overflow-x: auto; padding-bottom: .25rem; scrollbar-width: none; }
+    .market-tickers::-webkit-scrollbar { display: none; }
+    .ticker-item { display: flex; flex-direction: column; gap: 2px; min-width: 80px; }
+    .ticker-sym { font-size: .7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .ticker-price { font-size: .9rem; font-weight: 700; font-family: var(--font-mono); }
+    .ticker-change { font-size: .75rem; font-weight: 600; }
+    .ticker-change.up { color: var(--clr-success); }
+    .ticker-change.down { color: var(--clr-danger); }
+
+    /* Exchange Card */
+    .exchange-card { background: linear-gradient(90deg, #1e293b, #334155); border: none; color: #fff; padding: .75rem 1.5rem !important; }
+    .exchange-grid { display: flex; justify-content: space-around; gap: 1rem; }
+    .exch-item { display: flex; flex-direction: column; align-items: center; }
+    .exch-label { font-size: .65rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; }
+    .exch-value { font-size: 1.125rem; font-weight: 700; font-family: var(--font-mono); color: #f8fafc; }
+
     /* Charts */
     .charts-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.25rem; }
     .chart-card { display: flex; flex-direction: column; }
@@ -314,6 +483,24 @@ import { pt } from 'date-fns/locale';
     .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
     .legend-dot.income  { background: var(--clr-success); }
     .legend-dot.expense { background: var(--clr-danger); }
+
+    .market-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .market-card { display: flex; flex-direction: column; }
+    .market-list { display: grid; gap: .75rem; }
+    .market-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem;
+      background: var(--bg-surface2);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+    }
+    .market-symbol { font-size: .95rem; font-weight: 700; }
+    .market-name { font-size: .8rem; color: var(--text-secondary); margin-top: .2rem; }
+    .market-values { display: flex; flex-direction: column; align-items: flex-end; gap: .2rem; text-align: right; }
+    .market-price { font-size: .95rem; font-weight: 700; }
+    .market-change { font-size: .8rem; }
+    .market-change.positive { color: var(--clr-success); }
+    .market-change.negative { color: var(--clr-danger); }
 
     /* Category list */
     .category-list { display: flex; flex-direction: column; gap: .875rem; }
@@ -383,6 +570,7 @@ export class DashboardComponent implements OnInit {
   private dashSvc = inject(DashboardService);
   private accSvc  = inject(AccountService);
   private txSvc   = inject(TransactionService);
+  private finSvc  = inject(FinanceService);
   private auth    = inject(AuthService);
 
   summary          = signal<DashboardSummary | null>(null);
@@ -390,14 +578,21 @@ export class DashboardComponent implements OnInit {
   categoryData     = signal<CategorySummary[]>([]);
   accounts         = signal<Account[]>([]);
   recentTx         = signal<Transaction[]>([]);
+  marketIndices    = signal<MarketTicker[]>([]);
+  cryptoPrices     = signal<MarketTicker[]>([]);
+  marketUpdatedAt  = signal<string>('');
+  exchangeRates    = signal<ExchangeRates | null>(null);
 
   loadingSummary   = signal(true);
   loadingEvolution = signal(true);
   loadingCategory  = signal(true);
   loadingAccounts  = signal(true);
   loadingTx        = signal(true);
+  loadingMarket    = signal(true);
+  loadingCrypto    = signal(true);
+  loadingFinance   = signal(true);
 
-  selectedMonth = format(new Date(), 'yyyy-MM');
+  selectedMonth     = format(new Date(), 'yyyy-MM');
 
   months = Array.from({ length: 12 }, (_, i) => {
     const d = subMonths(new Date(), i);
@@ -407,7 +602,7 @@ export class DashboardComponent implements OnInit {
   firstName    = computed(() => this.auth.user()?.name?.split(' ')[0] ?? 'utilizador');
   savingsRate  = computed(() => {
     const s = this.summary();
-    if (!s || !s.total_income) return 0;
+    if (!s?.total_income) return 0;
     return Math.max(0, ((s.total_income - s.total_expense) / s.total_income) * 100);
   });
   expenseCategories = computed(() => this.categoryData().filter(c => c.type === 'expense').slice(0, 5));
@@ -435,17 +630,21 @@ export class DashboardComponent implements OnInit {
   }
 
   expenseRateLabel(): string {
-    const s = this.summary();
-    if (!s || !s.total_income) return 'Sem receita';
-    const pct = Math.round((s.total_expense / s.total_income) * 100);
+    const totalIncome = this.summary()?.total_income;
+    if (!totalIncome) return 'Sem receita';
+    const pct = Math.round((this.summary()!.total_expense / totalIncome) * 100);
     return `${pct}% da receita`;
   }
 
   expenseRateBadgeClass(): string {
-    const s = this.summary();
-    if (!s || !s.total_income) return 'badge badge-info';
-    const pct = (s.total_expense / s.total_income) * 100;
-    return pct > 80 ? 'badge badge-danger' : pct > 60 ? 'badge badge-warning' : 'badge badge-success';
+    const summary = this.summary();
+    const totalIncome = summary?.total_income;
+    if (!totalIncome) return 'badge badge-info';
+
+    const pct = (summary.total_expense / totalIncome) * 100;
+    if (pct > 80) return 'badge badge-danger';
+    if (pct > 60) return 'badge badge-warning';
+    return 'badge badge-success';
   }
 
   accountIcon(type: string): string {
@@ -487,6 +686,32 @@ export class DashboardComponent implements OnInit {
     this.txSvc.list({ per_page: 7, page: 1 }).subscribe({
       next: r => { this.recentTx.set(r.data); this.loadingTx.set(false); },
       error: () => this.loadingTx.set(false),
+    });
+
+    // Câmbio e Mercado
+    this.loadingFinance.set(true);
+    this.finSvc.getExchangeRates().subscribe({
+      next: r => this.exchangeRates.set(r.data),
+    });
+
+    this.loadingMarket.set(true);
+    this.finSvc.getMarketSummary().subscribe({
+      next: r => {
+        this.marketIndices.set(r.data?.indices ?? []);
+        this.marketUpdatedAt.set(r.data?.updated_at ?? '');
+        this.loadingMarket.set(false);
+        this.loadingFinance.set(false);
+      },
+      error: () => {
+        this.loadingMarket.set(false);
+        this.loadingFinance.set(false);
+      },
+    });
+
+    this.loadingCrypto.set(true);
+    this.finSvc.cryptoPrices().subscribe({
+      next: r => { this.cryptoPrices.set(r.data ?? []); this.loadingCrypto.set(false); },
+      error: () => this.loadingCrypto.set(false),
     });
   }
 }

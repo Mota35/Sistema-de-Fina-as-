@@ -32,8 +32,12 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 
 // Serve uploaded files
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-if (str_starts_with($uri, '/storage/uploads/')) {
-    $filePath = ROOT_PATH . $uri;
+if (str_contains($uri, '/storage/uploads/')) {
+    // Extrair o caminho a partir de /storage/uploads/
+    $parts = explode('/storage/uploads/', $uri);
+    $relativePath = '/storage/uploads/' . end($parts);
+    $filePath = ROOT_PATH . $relativePath;
+    
     if (file_exists($filePath) && is_file($filePath)) {
         $mime = mime_content_type($filePath);
         header('Content-Type: ' . $mime);
@@ -41,9 +45,6 @@ if (str_starts_with($uri, '/storage/uploads/')) {
         readfile($filePath);
         exit;
     }
-    http_response_code(404);
-    echo json_encode(['success' => false, 'message' => 'File not found.']);
-    exit;
 }
 
 // Dispatch
