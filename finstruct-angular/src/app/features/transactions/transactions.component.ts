@@ -4,35 +4,37 @@ import { FormsModule } from '@angular/forms';
 import { TransactionService, AccountService, CategoryService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { TranslationService } from '../../core/services/translation.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { MoneyPipe } from '../../shared/pipes/money.pipe';
 import { Transaction, Account, Category, TransactionFilters } from '../../core/models';
 
 @Component({
   selector: 'app-transactions',
   standalone: true,
-  imports: [CommonModule, FormsModule, MoneyPipe],
+  imports: [CommonModule, FormsModule, MoneyPipe, TranslatePipe],
   template: `
 <div class="p-4 md:p-6 animate-fade-in" [class]="theme.isDark() ? 'text-slate-100' : 'text-slate-900'">
 
   <!-- Header -->
   <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
     <div>
-      <h1 class="text-2xl font-black tracking-tight" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">Extrato & Ledger</h1>
-      <p class="text-xs mt-1" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">Diário estruturado de entradas e saídas</p>
+      <h1 class="text-2xl font-black tracking-tight" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">{{ 'tx.title' | translate }}</h1>
+      <p class="text-xs mt-1" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">{{ 'tx.subtitle' | translate }}</p>
     </div>
     <button (click)="openDrawer()"
             class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs px-5 py-3 rounded-xl shadow-lg shadow-amber-500/15 transition-all">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
       </svg>
-      Lançar Nova Transação
+      {{ 'tx.new' | translate }}
     </button>
   </div>
 
   <!-- Summary Cards -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
     <div class="p-5 rounded-2xl border" [class]="theme.isDark() ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'">
-      <span class="label block">Total Receitas (Mês)</span>
+      <span class="label block">{{ 'tx.income_total' | translate }}</span>
       <div class="flex items-center justify-between mt-3">
         <span class="text-xl font-bold font-mono text-white">{{ incomeTotal() | money }}</span>
         <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -43,7 +45,7 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
       </div>
     </div>
     <div class="p-5 rounded-2xl border" [class]="theme.isDark() ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'">
-      <span class="label block">Total Despesas (Mês)</span>
+      <span class="label block">{{ 'tx.expense_total' | translate }}</span>
       <div class="flex items-center justify-between mt-3">
         <span class="text-xl font-bold font-mono text-white">{{ expenseTotal() | money }}</span>
         <div class="w-8 h-8 rounded-lg bg-red-400/10 flex items-center justify-center">
@@ -55,7 +57,7 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
     </div>
     <div class="p-5 rounded-2xl border border-emerald-500/30 shadow-lg shadow-emerald-500/5"
          [class]="theme.isDark() ? 'bg-slate-900' : 'bg-white'">
-      <span class="label block">Saldo Líquido</span>
+      <span class="label block">{{ 'tx.net_balance' | translate }}</span>
       <div class="flex items-center justify-between mt-3">
         <span class="text-xl font-bold font-mono" [class]="netBalance() >= 0 ? 'text-emerald-400' : 'text-red-400'">
           {{ netBalance() | money }}
@@ -68,7 +70,7 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
   <div class="p-4 rounded-2xl border mb-6 flex flex-col md:flex-row gap-4 items-center justify-between"
        [class]="theme.isDark() ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'">
     <div class="relative w-full md:w-80">
-      <input type="text" placeholder="Filtrar descrição..." [(ngModel)]="filters.search"
+      <input type="text" [placeholder]="'tx.filter_placeholder' | translate" [(ngModel)]="filters.search"
              (input)="loadTransactions()"
              class="w-full rounded-xl px-3.5 py-2 pl-9 text-xs focus:outline-none transition-all"
              [class]="theme.isDark() ? 'bg-slate-950 border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500/80' : 'bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-amber-500'"/>
@@ -83,7 +85,7 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
               [class]="typeFilter === t
                 ? 'bg-amber-500 text-slate-950 font-bold'
                 : (theme.isDark() ? 'bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-600')">
-        {{ t === 'all' ? 'Todos' : t === 'income' ? 'Receitas' : 'Despesas' }}
+        {{ (t === 'all' ? 'tx.all' : t === 'income' ? 'tx.income' : 'tx.expense') | translate }}
       </button>
     </div>
   </div>
@@ -93,8 +95,8 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
        [class]="theme.isDark() ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'">
     <div class="p-4 border-b flex justify-between items-center"
          [class]="theme.isDark() ? 'border-slate-800 bg-slate-950/20' : 'border-slate-100 bg-slate-50'">
-      <span class="text-xs font-bold" [class]="theme.isDark() ? 'text-slate-300' : 'text-slate-700'">Folha de Lançamentos</span>
-      <span class="text-[10px] font-mono text-slate-500">{{ transactions().length }} transações</span>
+      <span class="text-xs font-bold" [class]="theme.isDark() ? 'text-slate-300' : 'text-slate-700'">{{ 'tx.ledger' | translate }}</span>
+      <span class="text-[10px] font-mono text-slate-500">{{ transactions().length }} {{ 'tx.count' | translate }}</span>
     </div>
 
     <div *ngIf="loading()" class="p-8 flex justify-center">
@@ -105,7 +107,7 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
       <svg class="w-10 h-10 mx-auto text-slate-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
       </svg>
-      <p class="text-xs">Nenhuma transação encontrada</p>
+      <p class="text-xs">{{ 'tx.no_found' | translate }}</p>
     </div>
 
     <div *ngIf="!loading() && transactions().length > 0" class="overflow-x-auto">
@@ -113,12 +115,12 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
         <thead>
           <tr class="font-semibold border-b"
               [class]="theme.isDark() ? 'text-slate-500 border-slate-800 bg-slate-950/10' : 'text-slate-400 border-slate-100 bg-slate-50'">
-            <th class="py-3 px-4">Data</th>
-            <th class="px-3">Descrição</th>
-            <th class="px-3">Categoria</th>
-            <th class="px-3">Conta</th>
-            <th class="px-3 text-right">Valor</th>
-            <th class="px-3 text-right">Ações</th>
+            <th class="py-3 px-4">{{ 'tx.date' | translate }}</th>
+            <th class="px-3">{{ 'tx.description' | translate }}</th>
+            <th class="px-3">{{ 'tx.category' | translate }}</th>
+            <th class="px-3">{{ 'tx.account' | translate }}</th>
+            <th class="px-3 text-right">{{ 'tx.value' | translate }}</th>
+            <th class="px-3 text-right">{{ 'tx.actions' | translate }}</th>
           </tr>
         </thead>
         <tbody class="divide-y" [class]="theme.isDark() ? 'divide-slate-800/50' : 'divide-slate-100'">
@@ -157,13 +159,13 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
       <button (click)="prevPage()" [disabled]="currentPage() <= 1"
               class="px-3 py-1.5 text-xs rounded-lg border transition-all disabled:opacity-40"
               [class]="theme.isDark() ? 'border-slate-800 text-slate-400 hover:bg-slate-800' : 'border-slate-200 text-slate-500 hover:bg-slate-100'">
-        ← Anterior
+        ← {{ 'tx.prev' | translate }}
       </button>
       <span class="text-[10px] font-mono text-slate-500">{{ currentPage() }} / {{ totalPages() }}</span>
       <button (click)="nextPage()" [disabled]="currentPage() >= totalPages()"
               class="px-3 py-1.5 text-xs rounded-lg border transition-all disabled:opacity-40"
               [class]="theme.isDark() ? 'border-slate-800 text-slate-400 hover:bg-slate-800' : 'border-slate-200 text-slate-500 hover:bg-slate-100'">
-        Seguinte →
+        {{ 'tx.next' | translate }} →
       </button>
     </div>
   </div>
@@ -183,9 +185,9 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
           </svg>
-          Lançar Transação
+          {{ 'tx.drawer_title' | translate }}
         </h3>
-        <p class="text-[10px] mt-1" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">Registe entradas ou saídas financeiras</p>
+        <p class="text-[10px] mt-1" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">{{ 'tx.drawer_subtitle' | translate }}</p>
       </div>
       <button (click)="closeDrawer()" class="p-1.5 rounded-lg transition-all"
               [class]="theme.isDark() ? 'text-slate-400 hover:bg-slate-800 hover:text-white' : 'text-slate-400 hover:bg-slate-100'">
@@ -198,70 +200,70 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
     <form (ngSubmit)="saveTransaction()" class="flex flex-col gap-4 flex-1">
       <!-- Type -->
       <div class="flex flex-col gap-1.5">
-        <span class="label">Natureza</span>
+        <span class="label">{{ 'tx.nature' | translate }}</span>
         <div class="grid grid-cols-2 gap-2 p-1 rounded-xl border"
              [class]="theme.isDark() ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'">
           <button type="button" (click)="form.type='income'"
                   class="py-1.5 text-xs font-bold rounded-lg transition-all"
                   [class]="form.type==='income' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : (theme.isDark() ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900')">
-            Receita (+)
+            {{ 'tx.income_plus' | translate }}
           </button>
           <button type="button" (click)="form.type='expense'"
                   class="py-1.5 text-xs font-bold rounded-lg transition-all"
                   [class]="form.type==='expense' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : (theme.isDark() ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900')">
-            Despesa (-)
+            {{ 'tx.expense_minus' | translate }}
           </button>
         </div>
       </div>
 
       <div class="flex flex-col gap-1.5">
-        <label class="label">Descrição</label>
+        <label class="label">{{ 'tx.description' | translate }}</label>
         <input type="text" [(ngModel)]="form.description" name="desc" required
                placeholder="Ex: Salário, Supermercado..."
                class="input-base"/>
       </div>
 
       <div class="flex flex-col gap-1.5">
-        <label class="label">Valor ({{ auth.currentUser()?.currency ?? 'AOA' }})</label>
+        <label class="label">{{ 'tx.amount' | translate }} ({{ auth.currentUser()?.currency ?? 'AOA' }})</label>
         <input type="number" [(ngModel)]="form.amount" name="amount" required step="0.01" min="0.01"
                placeholder="0.00" class="input-base"/>
       </div>
 
       <div class="flex flex-col gap-1.5">
-        <label class="label">Conta</label>
+        <label class="label">{{ 'tx.account' | translate }}</label>
         <select [(ngModel)]="form.account_id" name="account" required class="input-base">
-          <option value="">Seleccione uma conta</option>
+          <option value="">{{ 'tx.select_account' | translate }}</option>
           <option *ngFor="let acc of accounts()" [value]="acc.id">{{ acc.name }}</option>
         </select>
       </div>
 
       <div class="flex flex-col gap-1.5">
-        <label class="label">Categoria</label>
+        <label class="label">{{ 'tx.category' | translate }}</label>
         <select [(ngModel)]="form.category_id" name="category" required class="input-base">
-          <option value="">Seleccione uma categoria</option>
+          <option value="">{{ 'tx.select_category' | translate }}</option>
           <option *ngFor="let cat of filteredCategories()" [value]="cat.id">{{ cat.name }}</option>
         </select>
       </div>
 
       <div class="flex flex-col gap-1.5">
-        <label class="label">Data</label>
+        <label class="label">{{ 'tx.date' | translate }}</label>
         <input type="date" [(ngModel)]="form.transaction_date" name="date" required class="input-base"/>
       </div>
 
       <div class="flex flex-col gap-1.5">
-        <label class="label">Notas (opcional)</label>
+        <label class="label">{{ 'tx.notes' | translate }}</label>
         <textarea [(ngModel)]="form.notes" name="notes" rows="2"
-                  placeholder="Observações adicionais..." class="input-base resize-none"></textarea>
+                  [placeholder]="'tx.notes_placeholder' | translate" class="input-base resize-none"></textarea>
       </div>
 
       <div *ngIf="formError()" class="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl">
-        {{ formError() }}
+        {{ formError() | translate }}
       </div>
 
       <button type="submit" [disabled]="saving()"
               class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs py-3 rounded-xl transition-all h-12 mt-2 flex items-center justify-center gap-1.5 disabled:opacity-50">
         <div *ngIf="saving()" class="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
-        <span *ngIf="!saving()">Salvar Transação</span>
+        <span *ngIf="!saving()">{{ (saving() ? 'tx.saving' : 'tx.save') | translate }}</span>
       </button>
     </form>
   </div>
@@ -271,6 +273,7 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
 export class TransactionsComponent implements OnInit {
   theme = inject(ThemeService);
   auth  = inject(AuthService);
+  trans = inject(TranslationService);
   private txSvc  = inject(TransactionService);
   private accSvc = inject(AccountService);
   private catSvc = inject(CategoryService);
@@ -331,7 +334,7 @@ export class TransactionsComponent implements OnInit {
 
   saveTransaction(): void {
     if (!this.form.description || !this.form.amount || !this.form.account_id || !this.form.category_id) {
-      this.formError.set('Preencha todos os campos obrigatórios.');
+      this.formError.set('tx.error_fields');
       return;
     }
     this.saving.set(true);
@@ -346,12 +349,12 @@ export class TransactionsComponent implements OnInit {
         else this.formError.set(r.message);
         this.saving.set(false);
       },
-      error: e => { this.formError.set(e.error?.message ?? 'Erro ao salvar'); this.saving.set(false); }
+      error: e => { this.formError.set(e.error?.message ?? 'tx.error_save'); this.saving.set(false); }
     });
   }
 
   deleteTx(id: number): void {
-    if (!confirm('Eliminar esta transação?')) return;
+    if (!confirm(this.trans.translate('tx.confirm_delete'))) return;
     this.txSvc.delete(id).subscribe(r => { if (r.success) this.loadTransactions(); });
   }
 }

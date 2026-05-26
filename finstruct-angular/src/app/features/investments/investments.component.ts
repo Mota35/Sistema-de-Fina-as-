@@ -479,7 +479,7 @@ const TYPE_COLORS: Record<string, string> = {
         <label class="label">Símbolo (ex: BTC, ETH, SOL)</label>
         <input type="text" [(ngModel)]="newAsset.symbol" placeholder="BTC"
                class="input-base uppercase font-mono"
-               (input)="newAsset.symbol = (newAsset.symbol ?? '').toUpperCase()"/>
+               (input)="newAsset.symbol = newAsset.symbol.toUpperCase()"/>
       </div>
       <div class="flex flex-col gap-1.5">
         <label class="label">Nome</label>
@@ -538,7 +538,7 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
   tradeQty   = 1;
   tradePrice = 0;
 
-  newAsset: Partial<PortfolioAsset> = { symbol:'', name:'', quantity:1, averagePrice:0, type:'Crypto' };
+  newAsset: PortfolioAsset = { symbol:'', name:'', quantity:1, averagePrice:0, currentPrice:0, type:'Crypto' };
 
   ngOnInit(): void {
     this.loadFromStorage();
@@ -637,7 +637,7 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
 
   // ─── Add / Remove ────────────────────────────────────────────────────────
   openAddModal(): void {
-    this.newAsset = { symbol:'', name:'', quantity:1, averagePrice:0, type:'Crypto' };
+    this.newAsset = { symbol:'', name:'', quantity:1, averagePrice:0, currentPrice:0, type:'Crypto' };
     this.addError.set(''); this.addModal.set(true);
   }
 
@@ -645,15 +645,15 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
     if (!this.newAsset.symbol || !this.newAsset.name) {
       this.addError.set('Símbolo e nome são obrigatórios.'); return;
     }
-    const exists = this.assets().some(a => a.symbol === this.newAsset.symbol?.toUpperCase());
+    const exists = this.assets().some(a => a.symbol === this.newAsset.symbol.toUpperCase());
     if (exists) { this.addError.set('Este símbolo já está na carteira.'); return; }
     const asset: PortfolioAsset = {
-      symbol:       (this.newAsset.symbol ?? '').toUpperCase(),
-      name:         this.newAsset.name ?? '',
-      quantity:     +(this.newAsset.quantity ?? 0),
-      averagePrice: +(this.newAsset.averagePrice ?? 0),
+      symbol:       this.newAsset.symbol.toUpperCase(),
+      name:         this.newAsset.name,
+      quantity:     +this.newAsset.quantity,
+      averagePrice: +this.newAsset.averagePrice,
       currentPrice: 0,
-      type:         (this.newAsset.type as any) ?? 'Crypto',
+      type:         this.newAsset.type,
     };
     this.assets.update(list => [...list, asset]);
     this.saveToStorage();

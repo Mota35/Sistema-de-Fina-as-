@@ -64,6 +64,15 @@ export class AuthService {
     this.isLoggedIn.set(true);
   }
 
+  updateCurrentUser(user: User): void {
+    const accessToken = this.getToken();
+    const refreshToken = this.getRefreshToken();
+    if (accessToken) localStorage.setItem('access_token', accessToken);
+    if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
+    localStorage.setItem('user', JSON.stringify(user));
+    this.currentUser.set(user);
+  }
+
   private loadToken(): string | null { return localStorage.getItem('access_token'); }
   private loadUser(): User | null {
     const u = localStorage.getItem('user');

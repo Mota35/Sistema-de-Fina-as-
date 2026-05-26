@@ -7,6 +7,8 @@ import { DashboardService } from '../../core/services/api.service';
 import { MarketService, AssetQuote } from '../../core/services/market.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { TranslationService } from '../../core/services/translation.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { MoneyPipe } from '../../shared/pipes/money.pipe';
 import { DashboardSummary } from '../../core/models';
 
@@ -15,7 +17,7 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, MoneyPipe],
+  imports: [CommonModule, RouterLink, FormsModule, MoneyPipe, TranslatePipe],
   template: `
 <div class="p-4 md:p-6 animate-fade-in" [class]="theme.isDark() ? 'bg-black text-slate-100' : 'bg-slate-50 text-slate-900'">
 
@@ -23,16 +25,16 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
     <div>
       <h1 class="text-2xl font-black tracking-tight" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">
-        {{ greeting() }}, {{ firstName() }} 👋
+        {{ greeting() | translate }}, {{ firstName() }} 👋
       </h1>
       <p class="text-xs mt-1" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">
-        Aqui está o seu resumo financeiro de {{ currentMonth() }}
+        {{ 'dashboard.summary_desc' | translate }} {{ currentMonth() }}
       </p>
     </div>
     <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-mono"
          [class]="theme.isDark() ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-600'">
       <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
-      Sincronização Activa
+      {{ 'dashboard.sync_active' | translate }}
     </div>
   </div>
 
@@ -49,7 +51,7 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
       <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-amber-500/5 to-transparent rounded-full"></div>
       <div class="flex justify-between items-start">
         <div>
-          <span class="label">Saldo Total</span>
+          <span class="label">{{ 'dashboard.total_balance' | translate }}</span>
           <h2 class="text-2xl md:text-3xl font-black mt-2" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">
             {{ dash()!.total_balance | money }}
           </h2>
@@ -67,7 +69,7 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
           {{ dash()!.comparison.income_trend==='up' ? '↑' : '↓' }}
           {{ dash()!.comparison.income_change_pct | number:'1.1-1' }}%
         </span>
-        <span [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">vs. mês anterior</span>
+        <span [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">{{ 'dashboard.vs_previous_month' | translate }}</span>
       </div>
     </div>
 
@@ -75,7 +77,7 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
          [class]="theme.isDark() ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'">
       <div class="flex justify-between items-start">
         <div>
-          <span class="label">Receitas do Mês</span>
+          <span class="label">{{ 'dashboard.monthly_income' | translate }}</span>
           <h2 class="text-2xl md:text-3xl font-black mt-2 text-emerald-400">
             {{ dash()!.current_month.income | money }}
           </h2>
@@ -86,14 +88,14 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
           </svg>
         </div>
       </div>
-      <p class="text-[10px] font-mono mt-4" [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">Este mês · {{ currentMonth() }}</p>
+      <p class="text-[10px] font-mono mt-4" [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">{{ 'dashboard.this_month' | translate }} · {{ currentMonth() }}</p>
     </div>
 
     <div class="p-6 rounded-2xl border"
          [class]="theme.isDark() ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'">
       <div class="flex justify-between items-start">
         <div>
-          <span class="label">Despesas do Mês</span>
+          <span class="label">{{ 'dashboard.monthly_expense' | translate }}</span>
           <h2 class="text-2xl md:text-3xl font-black mt-2 text-red-400">
             {{ dash()!.current_month.expense | money }}
           </h2>
@@ -104,7 +106,7 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
           </svg>
         </div>
       </div>
-      <p class="text-[10px] font-mono mt-4" [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">Este mês · {{ currentMonth() }}</p>
+      <p class="text-[10px] font-mono mt-4" [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">{{ 'dashboard.this_month' | translate }} · {{ currentMonth() }}</p>
     </div>
   </div>
 
@@ -115,12 +117,12 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
       <div class="flex items-center justify-between pb-3 border-b mb-4"
            [class]="theme.isDark() ? 'border-slate-800' : 'border-slate-100'">
         <div>
-          <h3 class="text-sm font-bold" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">Evolução Patrimonial</h3>
-          <p class="text-[10px]" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">Receitas vs. Despesas — Últimos 6 meses</p>
+          <h3 class="text-sm font-bold" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">{{ 'dashboard.evolution' | translate }}</h3>
+          <p class="text-[10px]" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">{{ 'dashboard.evolution_desc' | translate }}</p>
         </div>
         <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded border"
               [class]="theme.isDark() ? 'text-amber-500 bg-amber-500/5 border-amber-500/10' : 'text-blue-600 bg-blue-50 border-blue-200'">
-          Histórico 6M
+          {{ 'dashboard.history_6m' | translate }}
         </span>
       </div>
       <div class="h-48 relative">
@@ -150,15 +152,15 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
         </svg>
         <div *ngIf="!dash()!.evolution.length"
              class="absolute inset-0 flex items-center justify-center text-xs text-slate-500">
-          Sem dados de evolução
+          {{ 'dashboard.no_evolution_data' | translate }}
         </div>
       </div>
       <div class="flex gap-4 mt-2 text-[10px] font-mono">
         <span class="flex items-center gap-1.5">
-          <span class="w-3 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Receitas
+          <span class="w-3 h-1.5 rounded-full bg-emerald-400 inline-block"></span>{{ 'dashboard.income' | translate }}
         </span>
         <span class="flex items-center gap-1.5">
-          <span class="w-3 h-1.5 rounded-full bg-red-400 inline-block"></span>Despesas
+          <span class="w-3 h-1.5 rounded-full bg-red-400 inline-block"></span>{{ 'dashboard.expense' | translate }}
         </span>
       </div>
     </div>
@@ -166,8 +168,8 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
     <div class="rounded-2xl border p-5"
          [class]="theme.isDark() ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'">
       <div class="pb-3 border-b mb-4" [class]="theme.isDark() ? 'border-slate-800' : 'border-slate-100'">
-        <h3 class="text-sm font-bold" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">Saldo por Tipo</h3>
-        <p class="text-[10px]" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">Distribuição das contas</p>
+        <h3 class="text-sm font-bold" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">{{ 'dashboard.balance_by_type' | translate }}</h3>
+        <p class="text-[10px]" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">{{ 'dashboard.balance_by_type_desc' | translate }}</p>
       </div>
       <div class="flex flex-col gap-2">
         <div *ngFor="let bt of dash()!.balance_by_type; let i=index"
@@ -182,7 +184,7 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
           </span>
         </div>
         <div *ngIf="!dash()!.balance_by_type.length" class="py-6 text-center text-xs text-slate-500">
-          Sem contas registadas
+          {{ 'dashboard.no_accounts' | translate }}
         </div>
       </div>
     </div>
@@ -202,14 +204,14 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
           <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
           </svg>
-          Mercado de Criptomoedas
+          {{ 'dashboard.crypto_market' | translate }}
           <span class="text-[9px] font-mono px-2 py-0.5 rounded-full animate-pulse"
                 [class]="theme.isDark() ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600'">
-            ● Live · CoinGecko
+            ● {{ 'dashboard.live' | translate }} · CoinGecko
           </span>
         </h3>
         <p class="text-[10px] mt-0.5" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">
-          Clique num activo para ver o gráfico em tempo real. Actualiza a cada 60s.
+          {{ 'dashboard.crypto_desc' | translate }}
         </p>
       </div>
       <!-- Coin selector -->
@@ -257,19 +259,19 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
           <!-- Stats row -->
           <div class="flex gap-4 text-[10px] font-mono">
             <div class="text-center">
-              <p [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">Máx 24h</p>
+              <p [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">{{ 'dashboard.high_24h' | translate }}</p>
               <p class="font-bold text-emerald-400">$ {{ selectedQuote()!.high24h | number:'1.2-4' }}</p>
             </div>
             <div class="text-center">
-              <p [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">Mín 24h</p>
+              <p [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">{{ 'dashboard.low_24h' | translate }}</p>
               <p class="font-bold text-red-400">$ {{ selectedQuote()!.low24h | number:'1.2-4' }}</p>
             </div>
             <div class="text-center">
-              <p [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">Volume</p>
+              <p [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">{{ 'dashboard.volume' | translate }}</p>
               <p class="font-bold" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">$ {{ formatBig(selectedQuote()!.volume) }}</p>
             </div>
             <div class="text-center">
-              <p [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">Mkt Cap</p>
+              <p [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">{{ 'dashboard.mkt_cap' | translate }}</p>
               <p class="font-bold" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">$ {{ formatBig(selectedQuote()!.marketCap ?? 0) }}</p>
             </div>
           </div>
@@ -322,7 +324,7 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
           </svg>
           <div *ngIf="!loadingChart() && chartPrices().length <= 1"
                class="absolute inset-0 flex items-center justify-center text-xs text-slate-500">
-            Dados indisponíveis
+            {{ 'dashboard.no_chart_data' | translate }}
           </div>
         </div>
       </div>
@@ -371,11 +373,11 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
          [class]="theme.isDark() ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'">
       <div class="flex items-center justify-between pb-3 border-b mb-4"
            [class]="theme.isDark() ? 'border-slate-800' : 'border-slate-100'">
-        <h3 class="text-sm font-bold" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">Últimas Transações</h3>
+        <h3 class="text-sm font-bold" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">{{ 'dashboard.recent_transactions' | translate }}</h3>
         <a routerLink="/app/transactions"
            class="text-[10px] font-mono font-semibold"
            [class]="theme.isDark() ? 'text-amber-500 hover:text-amber-400' : 'text-blue-600 hover:text-blue-700'">
-          Ver todas →
+          {{ 'dashboard.view_all' | translate }} →
         </a>
       </div>
       <div class="flex flex-col gap-2.5">
@@ -393,7 +395,7 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
             <div>
               <p class="text-xs font-bold truncate max-w-[140px]"
                  [class]="theme.isDark() ? 'text-slate-200' : 'text-slate-800'">
-                {{ tx.description || 'Sem descrição' }}
+                {{ tx.description || ('dashboard.no_description' | translate) }}
               </p>
               <p class="text-[9px] font-mono" [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">
                 {{ tx.transaction_date }} · {{ tx.category_name }}
@@ -407,7 +409,7 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
         </div>
         <div *ngIf="!dash()!.recent_transactions.length"
              class="py-8 text-center text-xs text-slate-500">
-          Sem transações recentes
+          {{ 'dashboard.no_recent_transactions' | translate }}
         </div>
       </div>
     </div>
@@ -417,11 +419,11 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
          [class]="theme.isDark() ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'">
       <div class="flex items-center justify-between pb-3 border-b mb-4"
            [class]="theme.isDark() ? 'border-slate-800' : 'border-slate-100'">
-        <h3 class="text-sm font-bold" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">Progresso das Metas</h3>
+        <h3 class="text-sm font-bold" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">{{ 'dashboard.goals_progress' | translate }}</h3>
         <a routerLink="/app/goals"
            class="text-[10px] font-mono font-semibold"
            [class]="theme.isDark() ? 'text-amber-500 hover:text-amber-400' : 'text-blue-600 hover:text-blue-700'">
-          Ver todas →
+          {{ 'dashboard.view_all' | translate }} →
         </a>
       </div>
       <div class="flex flex-col gap-4">
@@ -448,18 +450,19 @@ const DEFAULT_CRYPTOS = ['BTC','ETH','BNB','SOL'];
           </div>
         </div>
         <div *ngIf="!dash()!.goals.length" class="py-8 text-center text-xs text-slate-500">
-          Sem metas definidas
+          {{ 'dashboard.no_goals' | translate }}
         </div>
       </div>
     </div>
   </div>
 </div>
-  `
+  `,
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   auth    = inject(AuthService);
   theme   = inject(ThemeService);
   market  = inject(MarketService);
+  trans   = inject(TranslationService);
   private dashSvc  = inject(DashboardService);
   private destroy$ = new Subject<void>();
 
@@ -547,16 +550,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   greeting(): string {
     const h = new Date().getHours();
-    return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+    if (h < 12) return 'dashboard.greeting_morning';
+    if (h < 18) return 'dashboard.greeting_afternoon';
+    return 'dashboard.greeting_evening';
   }
   firstName(): string { return this.auth.currentUser()?.name?.split(' ')[0] ?? ''; }
-  currentMonth(): string { return new Date().toLocaleDateString('pt', { month:'long', year:'numeric' }); }
+  currentMonth(): string {
+    const langMap: Record<string, string> = { 'pt': 'pt-PT', 'en': 'en-US', 'fr': 'fr-FR' };
+    const locale = langMap[this.trans.currentLang()] || 'pt-PT';
+    return new Date().toLocaleDateString(locale, { month:'long', year:'numeric' });
+  }
   accountTypeLabel(t: string): string {
-    const m: Record<string,string> = {
-      wallet:'Carteira', bank:'Banco', savings:'Poupança',
-      credit_card:'Cartão', investment:'Investimento'
+    const map: Record<string, Record<string, string>> = {
+      pt: { wallet:'Carteira', bank:'Banco', savings:'Poupança', credit_card:'Cartão', investment:'Investimento' },
+      en: { wallet:'Wallet', bank:'Bank', savings:'Savings', credit_card:'Credit Card', investment:'Investment' },
+      fr: { wallet:'Portefeuille', bank:'Banque', savings:'Épargne', credit_card:'Carte de crédit', investment:'Investissement' }
     };
-    return m[t] ?? t;
+    return map[this.trans.currentLang()]?.[t] ?? t;
   }
   formatBig(n: number): string {
     if (n >= 1e9) return (n/1e9).toFixed(1) + 'B';

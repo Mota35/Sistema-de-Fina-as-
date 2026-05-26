@@ -4,20 +4,22 @@ import { FormsModule } from '@angular/forms';
 import { UserService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { TranslationService, Lang } from '../../core/services/translation.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { User } from '../../core/models';
 import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   template: `
 <div class="p-4 md:p-6 max-w-4xl mx-auto animate-fade-in" [class]="theme.isDark() ? 'text-slate-100' : 'text-slate-900'">
 
   <!-- Header -->
   <div class="mb-8">
-    <h1 class="text-2xl font-black tracking-tight" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">Configurações</h1>
-    <p class="text-xs mt-1" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">Gerencie o seu perfil e preferências da plataforma</p>
+    <h1 class="text-2xl font-black tracking-tight" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">{{ 'settings.title' | translate }}</h1>
+    <p class="text-xs mt-1" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">{{ 'settings.subtitle' | translate }}</p>
   </div>
 
   <!-- Success/Error -->
@@ -25,7 +27,7 @@ import { environment } from '../../../environments/environment';
     <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
     </svg>
-    {{ successMsg() }}
+    {{ successMsg() | translate }}
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -63,13 +65,13 @@ import { environment } from '../../../environments/environment';
 
         <div class="w-full mt-4 pt-4 border-t text-left" [class]="theme.isDark() ? 'border-slate-800' : 'border-slate-100'">
           <div class="flex justify-between text-xs mb-2">
-            <span [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">Membro desde</span>
+            <span [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">{{ 'settings.member_since' | translate }}</span>
             <span class="font-mono font-semibold" [class]="theme.isDark() ? 'text-slate-300' : 'text-slate-700'">
               {{ profile()?.created_at | date:'MMM yyyy' }}
             </span>
           </div>
           <div class="flex justify-between text-xs">
-            <span [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">Moeda</span>
+            <span [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">{{ 'settings.currency_label' | translate }}</span>
             <span class="font-mono font-semibold" [class]="theme.isDark() ? 'text-slate-300' : 'text-slate-700'">{{ profile()?.currency }}</span>
           </div>
         </div>
@@ -77,7 +79,7 @@ import { environment } from '../../../environments/environment';
 
       <!-- Theme toggle card -->
       <div class="p-5 rounded-2xl border" [class]="theme.isDark() ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'">
-        <h4 class="text-xs font-bold mb-3" [class]="theme.isDark() ? 'text-slate-200' : 'text-slate-800'">Aparência</h4>
+        <h4 class="text-xs font-bold mb-3" [class]="theme.isDark() ? 'text-slate-200' : 'text-slate-800'">{{ 'settings.appearance' | translate }}</h4>
         <div class="grid grid-cols-2 gap-2">
           <button (click)="setTheme('dark')"
                   class="flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all"
@@ -88,7 +90,7 @@ import { environment } from '../../../environments/environment';
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
             </svg>
-            <span class="text-[10px] font-bold">Escuro</span>
+            <span class="text-[10px] font-bold">{{ 'settings.dark' | translate }}</span>
           </button>
           <button (click)="setTheme('light')"
                   class="flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all"
@@ -99,7 +101,7 @@ import { environment } from '../../../environments/environment';
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
-            <span class="text-[10px] font-bold">Claro</span>
+            <span class="text-[10px] font-bold">{{ 'settings.light' | translate }}</span>
           </button>
         </div>
       </div>
@@ -114,7 +116,7 @@ import { environment } from '../../../environments/environment';
           <svg class="w-4 h-4" [class]="theme.isDark() ? 'text-amber-500' : 'text-blue-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
-          Dados do Perfil
+          {{ 'settings.profile_data' | translate }}
         </h3>
 
         <div *ngIf="profileError()" class="p-3 rounded-xl text-xs mb-4"
@@ -122,15 +124,15 @@ import { environment } from '../../../environments/environment';
 
         <form (ngSubmit)="saveProfile()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="flex flex-col gap-1.5">
-            <label class="label">Nome Completo</label>
+            <label class="label">{{ 'settings.name' | translate }}</label>
             <input type="text" [(ngModel)]="profileForm.name" name="name" required class="input-base"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="label">Email</label>
+            <label class="label">{{ 'settings.email' | translate }}</label>
             <input type="email" [(ngModel)]="profileForm.email" name="email" required class="input-base"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="label">Idioma</label>
+            <label class="label">{{ 'settings.language' | translate }}</label>
             <select [(ngModel)]="profileForm.language" name="language" class="input-base">
               <option value="pt">Português</option>
               <option value="en">English</option>
@@ -138,7 +140,7 @@ import { environment } from '../../../environments/environment';
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="label">Moeda Padrão</label>
+            <label class="label">{{ 'settings.currency' | translate }}</label>
             <select [(ngModel)]="profileForm.currency" name="currency" class="input-base">
               <option value="AOA">AOA — Kwanza Angolano</option>
               <option value="USD">USD — Dólar Americano</option>
@@ -151,7 +153,7 @@ import { environment } from '../../../environments/environment';
             <button type="submit" [disabled]="savingProfile()"
                     class="px-6 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-60"
                     [class]="theme.isDark() ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-blue-600 hover:bg-blue-700 text-white'">
-              {{ savingProfile() ? 'A guardar...' : 'Guardar Perfil' }}
+              {{ (savingProfile() ? 'settings.saving' : 'settings.save_profile') | translate }}
             </button>
           </div>
         </form>
@@ -163,24 +165,24 @@ import { environment } from '../../../environments/environment';
           <svg class="w-4 h-4" [class]="theme.isDark() ? 'text-amber-500' : 'text-blue-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
           </svg>
-          Segurança — Alterar Senha
+          {{ 'settings.security' | translate }}
         </h3>
 
         <div *ngIf="pwdError()" class="p-3 rounded-xl text-xs mb-4"
-             [class]="theme.isDark() ? 'bg-red-500/10 text-red-400' : 'bg-red-50 text-red-600'">{{ pwdError() }}</div>
+             [class]="theme.isDark() ? 'bg-red-500/10 text-red-400' : 'bg-red-50 text-red-600'">{{ pwdError() | translate }}</div>
 
         <form (ngSubmit)="savePassword()" class="flex flex-col gap-4">
           <div class="flex flex-col gap-1.5">
-            <label class="label">Senha Actual</label>
+            <label class="label">{{ 'settings.current_password' | translate }}</label>
             <input type="password" [(ngModel)]="pwdForm.current_password" name="cur" required placeholder="••••••••" class="input-base"/>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="flex flex-col gap-1.5">
-              <label class="label">Nova Senha</label>
+              <label class="label">{{ 'settings.new_password' | translate }}</label>
               <input type="password" [(ngModel)]="pwdForm.password" name="new" required minlength="8" placeholder="••••••••" class="input-base"/>
             </div>
             <div class="flex flex-col gap-1.5">
-              <label class="label">Confirmar Nova Senha</label>
+              <label class="label">{{ 'settings.confirm_password' | translate }}</label>
               <input type="password" [(ngModel)]="pwdForm.password_confirmation" name="conf" required placeholder="••••••••" class="input-base"/>
             </div>
           </div>
@@ -188,7 +190,7 @@ import { environment } from '../../../environments/environment';
             <button type="submit" [disabled]="savingPwd()"
                     class="px-6 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-60"
                     [class]="theme.isDark() ? 'bg-amber-500 hover:bg-amber-400 text-black' : 'bg-blue-600 hover:bg-blue-700 text-white'">
-              {{ savingPwd() ? 'A alterar...' : 'Alterar Senha' }}
+              {{ (savingPwd() ? 'settings.changing' : 'settings.change_password') | translate }}
             </button>
           </div>
         </form>
@@ -197,9 +199,9 @@ import { environment } from '../../../environments/environment';
       <!-- Danger Zone -->
       <div class="p-6 rounded-2xl border border-red-500/20"
            [class]="theme.isDark() ? 'bg-red-500/5' : 'bg-red-50'">
-        <h3 class="text-sm font-black text-red-400 mb-1">Zona de Perigo</h3>
+        <h3 class="text-sm font-black text-red-400 mb-1">{{ 'settings.danger_zone' | translate }}</h3>
         <p class="text-xs mb-4" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">
-          Estas acções são irreversíveis. Proceda com cautela.
+          {{ 'settings.danger_desc' | translate }}
         </p>
         <button (click)="auth.logout()"
                 class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/30 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-all">
@@ -207,7 +209,7 @@ import { environment } from '../../../environments/environment';
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
           </svg>
-          Terminar Sessão em Todos os Dispositivos
+          {{ 'settings.logout_all' | translate }}
         </button>
       </div>
     </div>
@@ -218,6 +220,7 @@ import { environment } from '../../../environments/environment';
 export class SettingsComponent implements OnInit {
   theme = inject(ThemeService);
   auth  = inject(AuthService);
+  trans = inject(TranslationService);
   private userSvc = inject(UserService);
 
   profile       = signal<User|null>(null);
@@ -260,8 +263,14 @@ export class SettingsComponent implements OnInit {
     this.userSvc.updateProfile(this.profileForm).subscribe({
       next: r => {
         this.savingProfile.set(false);
-        if (r.success) { this.profile.set(r.data); this.showSuccess('Perfil actualizado com sucesso!'); }
-        else this.profileError.set(r.message);
+        if (r.success) {
+          this.profile.set(r.data);
+          this.auth.updateCurrentUser(r.data);
+          this.trans.setLang(r.data.language as Lang);
+          this.showSuccess('settings.success_profile');
+        } else {
+          this.profileError.set(r.message);
+        }
       },
       error: e => { this.savingProfile.set(false); this.profileError.set(e.error?.message ?? 'Erro ao actualizar perfil.'); }
     });
@@ -269,13 +278,13 @@ export class SettingsComponent implements OnInit {
 
   savePassword(): void {
     if (this.pwdForm.password !== this.pwdForm.password_confirmation) {
-      this.pwdError.set('As senhas não coincidem.'); return;
+      this.pwdError.set('settings.error_password_match'); return;
     }
     this.savingPwd.set(true); this.pwdError.set(''); this.successMsg.set('');
     this.auth.changePassword(this.pwdForm.current_password, this.pwdForm.password, this.pwdForm.password_confirmation).subscribe({
       next: r => {
         this.savingPwd.set(false);
-        if (r.success) { this.pwdForm = { current_password:'', password:'', password_confirmation:'' }; this.showSuccess('Senha alterada com sucesso!'); }
+        if (r.success) { this.pwdForm = { current_password:'', password:'', password_confirmation:'' }; this.showSuccess('settings.success_password'); }
         else this.pwdError.set(r.message);
       },
       error: e => { this.savingPwd.set(false); this.pwdError.set(e.error?.errors?.current_password?.[0] ?? e.error?.message ?? 'Erro ao alterar senha.'); }
@@ -286,7 +295,11 @@ export class SettingsComponent implements OnInit {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
     this.userSvc.uploadAvatar(file).subscribe(r => {
-      if (r.success) { this.profile.set(r.data); this.showSuccess('Avatar actualizado!'); }
+      if (r.success) {
+        this.profile.set(r.data);
+        this.auth.updateCurrentUser(r.data);
+        this.showSuccess('settings.avatar_updated');
+      }
     });
   }
 

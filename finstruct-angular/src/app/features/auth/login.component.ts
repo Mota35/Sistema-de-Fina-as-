@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { TranslationService } from '../../core/services/translation.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
   template: `
 <div class="min-h-screen flex flex-col md:flex-row font-sans animate-fade-in"
      [class]="theme.isDark() ? 'bg-black text-white' : 'bg-white text-slate-900'">
@@ -48,21 +50,21 @@ import { ThemeService } from '../../core/services/theme.service';
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
         </svg>
-        PLATAFORMA CERTIFICADA SEC/CVM
+        {{ 'auth.certified' | translate }}
       </div>
       <h1 class="text-3xl lg:text-4xl font-extrabold leading-tight tracking-tight"
           [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">
-        Inteligência Estratégica para o seu Patrimônio.
+        {{ 'auth.hero_title' | translate }}
       </h1>
       <p class="text-sm mt-4 leading-relaxed" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">
-        Desenhado para investidores que exigem sofisticação absoluta e estruturação de alta performance.
+        {{ 'auth.hero_desc' | translate }}
       </p>
 
       <!-- Mini chart decoration -->
       <div class="mt-8 p-4 rounded-2xl border"
            [class]="theme.isDark() ? 'bg-black/60 border-white/5' : 'bg-white border-slate-200 shadow-sm'">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-[10px] font-mono" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">PATRIMÔNIO SOB GESTÃO</span>
+          <span class="text-[10px] font-mono" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">{{ 'auth.aum' | translate }}</span>
           <span class="text-[10px] font-mono font-bold" [class]="theme.isDark() ? 'text-amber-400' : 'text-blue-600'">+14.2% A.A.</span>
         </div>
         <div class="h-14 flex items-end gap-1.5">
@@ -86,7 +88,7 @@ import { ThemeService } from '../../core/services/theme.service';
         </div>
       </div>
       <p class="text-[10px]" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">
-        <strong [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">+2.400</strong> investidores ativos na plataforma
+        <strong [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">+2.400</strong> {{ 'auth.active_investors' | translate }}
       </p>
     </div>
   </div>
@@ -109,9 +111,9 @@ import { ThemeService } from '../../core/services/theme.service';
       </div>
 
       <h2 class="text-2xl font-black tracking-tight mb-1"
-          [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">Acesso à Plataforma</h2>
+          [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">{{ 'auth.title' | translate }}</h2>
       <p class="text-xs mb-8" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">
-        Entre com as suas credenciais corporativas
+        {{ 'auth.subtitle' | translate }}
       </p>
 
       <!-- Error -->
@@ -120,16 +122,16 @@ import { ThemeService } from '../../core/services/theme.service';
         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        {{ error() }}
+        {{ error() | translate }}
       </div>
 
       <form (ngSubmit)="submit()" class="flex flex-col gap-4">
         <!-- Email -->
         <div class="flex flex-col gap-1.5">
-          <label class="label">Email Corporativo</label>
+          <label class="label">{{ 'auth.email' | translate }}</label>
           <div class="relative">
             <input type="email" [(ngModel)]="email" name="email" required
-                   placeholder="nome@empresa.com"
+                   [placeholder]="'auth.email_placeholder' | translate"
                    class="input-base pl-9"/>
             <svg class="absolute left-3 top-2.5 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -139,7 +141,7 @@ import { ThemeService } from '../../core/services/theme.service';
 
         <!-- Password -->
         <div class="flex flex-col gap-1.5">
-          <label class="label">Senha de Acesso</label>
+          <label class="label">{{ 'auth.password' | translate }}</label>
           <div class="relative">
             <input [type]="showPwd ? 'text' : 'password'" [(ngModel)]="password" name="password" required
                    placeholder="••••••••" class="input-base pl-9 pr-10"/>
@@ -162,12 +164,12 @@ import { ThemeService } from '../../core/services/theme.service';
         <div class="flex items-center justify-between">
           <label class="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" [(ngModel)]="remember" name="remember" class="w-3.5 h-3.5 rounded"/>
-            <span class="text-[11px]" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">Lembrar acesso</span>
+            <span class="text-[11px]" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">{{ 'auth.remember' | translate }}</span>
           </label>
           <a routerLink="/auth/forgot-password"
              class="text-[11px] font-semibold transition-colors"
              [class]="theme.isDark() ? 'text-amber-500 hover:text-amber-400' : 'text-blue-600 hover:text-blue-700'">
-            Esqueceu a senha?
+            {{ 'auth.forgot_password' | translate }}
           </a>
         </div>
 
@@ -175,7 +177,7 @@ import { ThemeService } from '../../core/services/theme.service';
                 class="w-full font-extrabold text-sm py-3 rounded-xl mt-2 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
                 [class]="theme.isDark() ? 'bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/20' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20'">
           <div *ngIf="loading()" class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-          <span>{{ loading() ? 'A entrar...' : 'Aceder à Plataforma' }}</span>
+          <span>{{ (loading() ? 'auth.logging_in' : 'auth.login_btn') | translate }}</span>
           <svg *ngIf="!loading()" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
           </svg>
@@ -183,11 +185,11 @@ import { ThemeService } from '../../core/services/theme.service';
       </form>
 
       <p class="text-center text-xs mt-6" [class]="theme.isDark() ? 'text-slate-500' : 'text-slate-400'">
-        Não tem conta?
+        {{ 'auth.no_account' | translate }}
         <a routerLink="/auth/register"
            class="font-bold ml-1"
            [class]="theme.isDark() ? 'text-amber-500 hover:text-amber-400' : 'text-blue-600 hover:text-blue-700'">
-          Criar conta grátis
+          {{ 'auth.create_account' | translate }}
         </a>
       </p>
     </div>
@@ -208,7 +210,7 @@ export class LoginComponent {
   error    = signal('');
 
   submit(): void {
-    if (!this.email || !this.password) { this.error.set('Preencha todos os campos.'); return; }
+    if (!this.email || !this.password) { this.error.set('auth.error_fields'); return; }
     this.loading.set(true); this.error.set('');
     this.auth.login({ email: this.email, password: this.password }).subscribe({
       next: r => {
@@ -216,7 +218,7 @@ export class LoginComponent {
         if (r.success) this.router.navigate(['/app/dashboard']);
         else this.error.set(r.message);
       },
-      error: e => { this.loading.set(false); this.error.set(e.error?.message ?? 'Credenciais inválidas.'); }
+      error: e => { this.loading.set(false); this.error.set(e.error?.message ?? 'auth.invalid_credentials'); }
     });
   }
 }

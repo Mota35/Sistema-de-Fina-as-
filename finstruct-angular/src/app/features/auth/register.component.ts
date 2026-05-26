@@ -51,7 +51,7 @@ import { ThemeService } from '../../core/services/theme.service';
         <div class="grid grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="label">Idioma</label>
-            <select [(ngModel)]="form.language" name="lang" class="input-base">
+            <select [(ngModel)]="form.language" name="language" class="input-base">
               <option value="pt">Português</option>
               <option value="en">English</option>
             </select>
@@ -72,7 +72,7 @@ import { ThemeService } from '../../core/services/theme.service';
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="label">Confirmar Senha</label>
-          <input type="password" [(ngModel)]="form.password_confirmation" name="pc" required placeholder="••••••••" class="input-base"/>
+          <input type="password" [(ngModel)]="form.password_confirmation" name="password_confirmation" required placeholder="••••••••" class="input-base"/>
         </div>
 
         <button type="submit" [disabled]="loading()"
