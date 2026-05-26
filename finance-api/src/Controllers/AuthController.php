@@ -93,12 +93,12 @@ class AuthController extends BaseController
         try {
             $data = $this->body();
             $this->validate($data, [
-                'token'                 => 'required',
+                'code'                  => 'required',
                 'password'              => 'required|min:8|confirmed',
                 'password_confirmation' => 'required',
             ]);
 
-            $this->service->resetPassword($data['token'], $data['password']);
+            $this->service->resetPassword($data['code'], $data['password']);
             jsonResponse(null, 200, 'Senha alterada com sucesso.');
         } catch (\Throwable $e) {
             $this->handleException($e);

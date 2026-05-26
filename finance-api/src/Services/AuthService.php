@@ -84,22 +84,22 @@ class AuthService
         $user = $this->userRepo->findByEmail(strtolower(trim($email)));
         if (!$user) return; // Silence: don't reveal if email exists
 
-        $token     = generateToken(64);
+        $code      = (string) rand(100000, 999999);
         $expiresAt = date('Y-m-d H:i:s', time() + 3600); // 1 hour
 
-        $this->userRepo->storeResetToken($user['id'], $token, $expiresAt);
-        $this->mailer->sendPasswordReset($user['email'], $user['name'], $token);
+        $this->userRepo->storeResetToken($user['id'], $code, $expiresAt);
+        $this->mailer->sendPasswordReset($user['email'], $user['name'], $code);
 
-        $this->logger->info("Password reset requested for: {$user['email']}");
+        $this->logger->info("Password reset code generated for: {$user['email']}");
     }
 
     // ─── Reset Password ──────────────────────────────────────────────────────
-    public function resetPassword(string $token, string $newPassword): void
+    public function resetPassword(string $code, string $newPassword): void
     {
-        $user = $this->userRepo->findByResetToken($token);
+        $user = $this->userRepo->findByResetToken($code);
 
         if (!$user) {
-            throw new ValidationException(['token' => ['Token inválido ou expirado.']]);
+            throw new ValidationException(['code' => ['Código inválido ou expirado.']]);
         }
 
         $this->userRepo->update($user['id'], [
@@ -107,7 +107,7 @@ class AuthService
         ]);
 
         $this->userRepo->clearResetToken($user['id']);
-        $this->logger->info("Password reset completed for user ID: {$user['id']}");
+        $this->logger->info("Password reset completed with code for user ID: {$user['id']}");
     }
 
     // ─── Change Password ─────────────────────────────────────────────────────

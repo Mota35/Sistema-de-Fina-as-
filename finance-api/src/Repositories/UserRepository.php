@@ -47,44 +47,62 @@ class UserRepository extends BaseRepository
 
     public function storeResetToken(int $userId, string $token, string $expiresAt): bool
     {
-        // Store in a dedicated column (we reuse avatar slot via a tokens table approach)
-        $stmt = $this->db->prepare(
-            "UPDATE users
-             SET reset_token = :token, reset_token_expires = :expires
-             WHERE id = :id"
-        );
-        // Graceful fallback if columns don't exist yet
+        // Store in a dedicated column (graceful if columns/table missing)
+        try {
+            $stmt = $this->db->prepare(
+                "UPDATE users
+                 SET reset_token = :token, reset_token_expires = :expires
+                 WHERE id = :id"
+            );
+        } catch (\PDOException $e) {
+            return false;
+        }
+
         try {
             $stmt->execute([':token' => $token, ':expires' => $expiresAt, ':id' => $userId]);
             return true;
-        } catch (\PDOException) {
+        } catch (\PDOException $e) {
             return false;
         }
     }
 
     public function findByResetToken(string $token): ?array
     {
-        $stmt = $this->db->prepare(
-            "SELECT * FROM users
-             WHERE reset_token = :token
-               AND reset_token_expires > NOW()
-             LIMIT 1"
-        );
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT * FROM users
+                 WHERE reset_token = :token
+                   AND reset_token_expires > NOW()
+                 LIMIT 1"
+            );
+        } catch (\PDOException $e) {
+            return null;
+        }
+
         try {
             $stmt->execute([':token' => $token]);
             $result = $stmt->fetch();
             return $result ?: null;
-        } catch (\PDOException) {
+        } catch (\PDOException $e) {
             return null;
         }
     }
 
     public function clearResetToken(int $userId): void
     {
-        $stmt = $this->db->prepare(
-            "UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE id = :id"
-        );
-        try { $stmt->execute([':id' => $userId]); } catch (\PDOException) {}
+        try {
+            $stmt = $this->db->prepare(
+                "UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE id = :id"
+            );
+        } catch (\PDOException $e) {
+            return;
+        }
+
+        try {
+            $stmt->execute([':id' => $userId]);
+        } catch (\PDOException $e) {
+            // ignore
+        }
     }
 
     public function listAll(int $page, int $perPage, ?string $search = null): array

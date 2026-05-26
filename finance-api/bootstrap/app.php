@@ -46,6 +46,12 @@ if (file_exists($envFile)) {
 // ─── Load helpers ────────────────────────────────────────────────────────────
 require_once SRC_PATH . '/Helpers/functions.php';
 
+// ─── Composer autoload (optional) ───────────────────────────────────────────
+$composer = ROOT_PATH . '/vendor/autoload.php';
+if (file_exists($composer)) {
+    require_once $composer;
+}
+
 // ─── Error handling ──────────────────────────────────────────────────────────
 if (env('APP_DEBUG', 'false') === 'true') {
     error_reporting(E_ALL);
