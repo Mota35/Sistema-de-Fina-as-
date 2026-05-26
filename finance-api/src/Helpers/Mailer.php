@@ -44,7 +44,7 @@ class Mailer
 
     public function sendPasswordReset(string $to, string $name, string $token): bool
     {
-        $resetUrl = env('APP_URL') . '/reset-password?token=' . $token;
+        $resetUrl = env('FRONTEND_URL', 'http://localhost:4200') . '/auth/reset-password?token=' . $token;
         $subject  = 'Recuperação de Senha - ' . env('APP_NAME');
 
         $body = "

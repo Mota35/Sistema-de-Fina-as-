@@ -107,51 +107,6 @@ class TransactionController extends BaseController
         } catch (\Throwable $e) { $this->handleException($e); }
     }
 
-    // GET /api/transactions/export?format=csv&...filters
-    public function export(): void
-    {
-        try {
-            $payload = $this->auth->authenticate();
-            $format  = $this->queryParam('format', 'csv');
-            if ($format !== 'csv') {
-                errorResponse('Formato inválido. Apenas CSV suportado.', 400);
-            }
-
-            $page    = (int) $this->queryParam('page', 1);
-            $perPage = (int) $this->queryParam('per_page', 1000);
-            $filters = array_filter([
-                'account_id'  => $this->queryParam('account_id'),
-                'category_id' => $this->queryParam('category_id'),
-                'type'        => $this->queryParam('type'),
-                'date_from'   => $this->queryParam('date_from'),
-                'date_to'     => $this->queryParam('date_to'),
-                'search'      => $this->queryParam('search'),
-            ], fn($value) => $value !== null && $value !== '');
-
-            $rows     = $this->service->export($payload['sub'], $filters, $page, $perPage);
-            $filename = sprintf('transacoes-%s.csv', date('YmdHis'));
-
-            header('Content-Type: text/csv; charset=UTF-8');
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-            header('Cache-Control: no-store, no-cache');
-            $output = fopen('php://output', 'w');
-            fputcsv($output, ['Data', 'Descrição', 'Categoria', 'Conta', 'Tipo', 'Valor', 'Notas']);
-            foreach ($rows as $row) {
-                fputcsv($output, [
-                    $row['transaction_date'] ?? '',
-                    $row['description'] ?? '',
-                    $row['category_name'] ?? '',
-                    $row['account_name'] ?? '',
-                    $row['type'] ?? '',
-                    number_format((float) ($row['amount'] ?? 0), 2, '.', ''),
-                    $row['notes'] ?? '',
-                ]);
-            }
-            fclose($output);
-            exit;
-        } catch (\Throwable $e) { $this->handleException($e); }
-    }
-
     // GET /api/transactions/by-category?type=expense&date_from=...&date_to=...
     public function byCategory(): void
     {

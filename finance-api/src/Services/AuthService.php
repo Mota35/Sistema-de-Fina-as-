@@ -36,7 +36,7 @@ class AuthService
         ]);
 
         $user = $this->userRepo->findWithRole($userId);
-        //$this->mailer->sendWelcome($user['email'], $user['name']);
+        $this->mailer->sendWelcome($user['email'], $user['name']);
 
         $this->logger->info("New user registered: {$user['email']}");
 

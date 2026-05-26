@@ -21,12 +21,12 @@ class DashboardService
         $month = (int) date('m');
 
         // Current month income/expense
-        $monthSummary = $this->calculateMonthSummary($userId, $year, $month);
+        $monthSummary = $this->getMonthSummary($userId, $year, $month);
 
         // Last month for comparison
         $lastMonth     = $month === 1 ? 12 : $month - 1;
         $lastMonthYear = $month === 1 ? $year - 1 : $year;
-        $lastSummary   = $this->calculateMonthSummary($userId, $lastMonthYear, $lastMonth);
+        $lastSummary   = $this->getMonthSummary($userId, $lastMonthYear, $lastMonth);
 
         // Total balance across all accounts
         $totalBalance = $this->accountRepo->totalBalanceByUser($userId);
@@ -56,7 +56,12 @@ class DashboardService
         ];
     }
 
-    private function calculateMonthSummary(int $userId, int $year, int $month): array
+    public function getMonthlySummary(int $userId, int $year, int $month): array
+    {
+        return $this->getMonthSummary($userId, $year, $month);
+    }
+
+    private function getMonthSummary(int $userId, int $year, int $month): array
     {
         $rows    = $this->transactionRepo->summaryByMonth($userId, $year, $month);
         $income  = 0.0;
@@ -106,38 +111,4 @@ class DashboardService
 
         return array_values($result);
     }
-
-    /**
-     * Public wrapper for getMonthSummary - accepts YYYY-MM format
-     */
-    public function getMonthSummary(int $userId, string $month): array
-    {
-        [$year, $monthNum] = explode('-', $month) + [null, null];
-        $year = (int) $year;
-        $monthNum = (int) $monthNum;
-        
-        if ($year <= 0 || $monthNum < 1 || $monthNum > 12) {
-            return ['error' => 'Invalid month format'];
-        }
-        
-        return $this->calculateMonthSummary($userId, $year, $monthNum);
-    }
-
-    /**
-     * Get transactions grouped by category for a specific month
-     */
-    public function getByCategory(int $userId, string $month): array
-    {
-        [$year, $monthNum] = explode('-', $month) + [null, null];
-        $year = (int) $year;
-        $monthNum = (int) $monthNum;
-        
-        if ($year <= 0 || $monthNum < 1 || $monthNum > 12) {
-            return ['error' => 'Invalid month format'];
-        }
-
-        return $this->transactionRepo->byCategory($userId, $year, $monthNum);
-    }
-
-
 }

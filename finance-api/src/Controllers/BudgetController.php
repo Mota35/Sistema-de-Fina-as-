@@ -2,16 +2,16 @@
 
 namespace App\Controllers;
 
-use App\Services\DashboardService;
+use App\Services\BudgetService;
 
 class BudgetController extends BaseController
 {
-    private DashboardService $dashService;
+    private BudgetService $service;
 
     public function __construct()
     {
         parent::__construct();
-        $this->dashService = new DashboardService();
+        $this->service = new BudgetService();
     }
 
     // GET /api/budgets?month=2026-05
@@ -19,9 +19,19 @@ class BudgetController extends BaseController
     {
         try {
             $payload = $this->auth->authenticate();
-            $month   = $this->queryParam('month', date('Y-m'));
-            $data    = $this->dashService->getByCategory($payload['sub'], $month);
-            jsonResponse($data);
+            $month   = $this->queryParam('month');
+            $items   = $this->service->list($payload['sub'], $month ?: null);
+            jsonResponse($items);
+        } catch (\Throwable $e) { $this->handleException($e); }
+    }
+
+    // GET /api/budgets/{id}
+    public function show(int $id): void
+    {
+        try {
+            $payload = $this->auth->authenticate();
+            $budget  = $this->service->find($id, $payload['sub']);
+            jsonResponse($budget);
         } catch (\Throwable $e) { $this->handleException($e); }
     }
 
@@ -30,58 +40,40 @@ class BudgetController extends BaseController
     {
         try {
             $payload = $this->auth->authenticate();
-            
-            $data = $this->body();
-            $validated = [
-                'category_id' => $data['category_id'] ?? null,
-                'amount'      => $data['amount'] ?? 0,
-                'period'      => $data['period'] ?? 'monthly',
-                'name'        => $data['name'] ?? '',
-            ];
-
-            if (!$validated['category_id'] || $validated['amount'] <= 0) {
-                jsonResponse([
-                    'success' => false,
-                    'message' => 'Invalid category or amount',
-                ], 422);
-                return;
-            }
-
-            jsonResponse([
-                'success' => true,
-                'message' => 'Budget created',
-                'data'    => $validated,
-            ], 201);
+            $data    = $this->body();
+            $this->validate($data, [
+                'category_id'  => 'required|integer',
+                'limit_amount' => 'required|numeric|min:1',
+                'month'        => 'nullable|string',
+            ]);
+            $budget = $this->service->create($payload['sub'], $data);
+            jsonResponse($budget, 201, 'Orçamento criado com sucesso.');
         } catch (\Throwable $e) { $this->handleException($e); }
     }
 
     // PUT /api/budgets/{id}
-    public function update($id = null): void
+    public function update(int $id): void
     {
         try {
             $payload = $this->auth->authenticate();
-            
-            $data = $this->body();
-            
-            jsonResponse([
-                'success' => true,
-                'message' => 'Budget updated',
-                'id'      => $id,
+            $data    = $this->body();
+            $this->validate($data, [
+                'category_id'  => 'nullable|integer',
+                'limit_amount' => 'nullable|numeric|min:1',
+                'month'        => 'nullable|string',
             ]);
+            $budget = $this->service->update($id, $payload['sub'], $data);
+            jsonResponse($budget, 200, 'Orçamento atualizado com sucesso.');
         } catch (\Throwable $e) { $this->handleException($e); }
     }
 
     // DELETE /api/budgets/{id}
-    public function destroy($id = null): void
+    public function destroy(int $id): void
     {
         try {
             $payload = $this->auth->authenticate();
-            
-            jsonResponse([
-                'success' => true,
-                'message' => 'Budget deleted',
-                'id'      => $id,
-            ]);
+            $this->service->delete($id, $payload['sub']);
+            jsonResponse(null, 200, 'Orçamento eliminado com sucesso.');
         } catch (\Throwable $e) { $this->handleException($e); }
     }
 }

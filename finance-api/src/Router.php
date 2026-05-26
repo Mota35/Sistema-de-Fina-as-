@@ -65,13 +65,20 @@ class Router
     {
         $method = $_SERVER['REQUEST_METHOD'];
         $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $uri    = rtrim($uri, '/') ?: '/';
 
-        // Remove subfolder prefix quando corre dentro de /finance-api/public/
-        $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
-        if ($basePath && str_starts_with($uri, $basePath)) {
-            $uri = substr($uri, strlen($basePath));
+        // ── Strip public folder prefix only ────────────────────────────────────
+        // When running under a real web server, SCRIPT_NAME may include the
+        // public folder (e.g. /finance-api/public/index.php). We only want to
+        // remove that public prefix, not actual request route segments like /api.
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+        $scriptDir  = dirname($scriptName);
+
+        if ($scriptDir !== '/' && str_contains($scriptDir, '/public') && str_starts_with($uri, $scriptDir)) {
+            $uri = substr($uri, strlen($scriptDir));
         }
 
+        $uri = '/' . ltrim($uri, '/');
         $uri = rtrim($uri, '/') ?: '/';
 
         foreach ($this->routes as $route) {
@@ -131,7 +138,7 @@ class Router
             return;
         }
 
-       errorResponse(
+        errorResponse(
             env('APP_DEBUG') === 'true' ? $e->getMessage() : 'Internal Server Error',
             500
         );

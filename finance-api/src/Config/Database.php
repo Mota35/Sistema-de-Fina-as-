@@ -24,12 +24,12 @@ class Database
                 $c['driver'],
                 $c['host'],
                 $c['port'],
-                $c['name'],      // era 'database'
+                $c['database'],
                 $c['charset']
             );
 
             try {
-                self::$instance = new PDO($dsn, $c['user'], $c['pass'], $c['options']); // era 'username', 'password'
+                self::$instance = new PDO($dsn, $c['username'], $c['password'], $c['options']);
             } catch (PDOException $e) {
                 $logger = new Logger();
                 $logger->critical('Database connection failed: ' . $e->getMessage());

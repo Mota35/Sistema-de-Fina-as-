@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary:    #0a0f1a;
+    --bg-secondary:  #0f172a;
+    --bg-card:       #0f172a;
+    --bg-card-hover: #162032;
+    --border:        #1e293b;
+    --text-primary:  #f1f5f9;
+    --text-secondary:#94a3b8;
+    --text-muted:    #475569;
+    --accent:        #f59e0b;
+    --accent-hover:  #fbbf24;
+    --success:       #34d399;
+    --danger:        #f87171;
+  }
+
+  .light-mode {
+    --bg-primary:    #f8fafc;
+    --bg-secondary:  #f1f5f9;
+    --bg-card:       #ffffff;
+    --bg-card-hover: #f8fafc;
+    --border:        #e2e8f0;
+    --text-primary:  #0f172a;
+    --text-secondary:#475569;
+    --text-muted:    #94a3b8;
+    --accent:        #d97706;
+    --accent-hover:  #b45309;
+    --success:       #059669;
+    --danger:        #dc2626;
+  }
+
+  html { font-family: 'Inter', system-ui, sans-serif; }
+  body { @apply bg-slate-950 text-slate-100 antialiased; }
+  body.light-mode { @apply bg-slate-50 text-slate-900; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #334155; }
+}
+
+@layer components {
+  /* Cards */
+  .card {
+    @apply bg-slate-900 border border-slate-800 rounded-2xl;
+    background-color: var(--bg-card);
+    border-color: var(--border);
+  }
+  .card-hover { @apply card transition-all duration-200 hover:border-slate-700; }
+
+  /* Buttons */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 font-extrabold text-xs px-5 py-3 rounded-xl
+           transition-all duration-200 cursor-pointer;
+    background-color: var(--accent);
+    color: #0a0f1a;
+  }
+  .btn-primary:hover { background-color: var(--accent-hover); }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 font-semibold text-xs px-4 py-2.5 rounded-xl
+           border transition-all duration-200 cursor-pointer;
+    border-color: var(--border);
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover { color: var(--text-primary); }
+
+  /* Inputs */
+  .input-base {
+    @apply w-full rounded-xl px-3 py-2 text-xs focus:outline-none transition-all;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+  .input-base:focus { border-color: var(--accent); }
+  .input-base::placeholder { color: var(--text-muted); }
+
+  /* Labels */
+  .label { @apply text-[10px] font-mono font-bold tracking-wider uppercase; color: var(--text-secondary); }
+
+  /* Badges */
+  .badge-success { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400; }
+  .badge-danger  { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-red-500/10 text-red-400; }
+  .badge-warning { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400; }
+  .badge-neutral { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-slate-800 text-slate-300; }
+
+  /* Animations */
+  .animate-fade-in   { animation: fadeIn 0.2s ease-in-out; }
+  .animate-slide-right { animation: slideInRight 0.3s ease-out; }
+  .animate-zoom-in   { animation: zoomIn 0.15s ease-out; }
+
+  /* Overlay */
+  .overlay { @apply fixed inset-0 backdrop-blur-sm z-50 flex; background: rgba(10,15,26,0.8); }
+
+  /* Progress bar */
+  .progress-bar { @apply h-1.5 rounded-full overflow-hidden; background-color: var(--border); }
+  .progress-fill { @apply h-full rounded-full transition-all duration-500; background-color: var(--accent); }
+  .progress-fill.danger  { background-color: var(--danger); }
+  .progress-fill.success { background-color: var(--success); }
+}
+
+@keyframes fadeIn      { from { opacity: 0; }                     to { opacity: 1; } }
+@keyframes slideInRight{ from { transform: translateX(100%); }    to { transform: translateX(0); } }
+@keyframes zoomIn      { from { transform: scale(0.95); opacity:0;} to { transform: scale(1); opacity:1; } }

@@ -91,15 +91,6 @@ class JWT
             ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
             ?? '';
 
-        if (empty($header) && function_exists('apache_request_headers')) {
-            $headers = apache_request_headers();
-            if (!empty($headers['Authorization'])) {
-                $header = $headers['Authorization'];
-            } elseif (!empty($headers['authorization'])) {
-                $header = $headers['authorization'];
-            }
-        }
-
         if (str_starts_with($header, 'Bearer ')) {
             return substr($header, 7);
         }

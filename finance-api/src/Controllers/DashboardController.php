@@ -43,12 +43,33 @@ class DashboardController extends BaseController
     }
 
     // GET /api/dashboard/summary?month=2026-05
+    // Alias do que o Angular chama directamente
     public function summary(): void
     {
         try {
-            $payload = $this->auth->authenticate();
-            $month   = $this->queryParam('month', date('Y-m'));
-            $data    = $this->dashService->getMonthSummary($payload['sub'], $month);
+            $payload  = $this->auth->authenticate();
+            $monthStr = $this->queryParam('month', date('Y-m'));
+
+            [$year, $month] = array_map('intval', explode('-', $monthStr . '-01'));
+
+            $data = $this->dashService->getMonthlySummary($payload['sub'], $year, $month);
+            jsonResponse($data);
+        } catch (\Throwable $e) { $this->handleException($e); }
+    }
+
+    // GET /api/dashboard/by-category?month=2026-05&type=expense
+    public function byCategory(): void
+    {
+        try {
+            $payload  = $this->auth->authenticate();
+            $monthStr = $this->queryParam('month', date('Y-m'));
+            $type     = $this->queryParam('type', 'expense');
+
+            [$year, $month] = array_map('intval', explode('-', $monthStr . '-01'));
+            $from = "$year-" . str_pad($month, 2, '0', STR_PAD_LEFT) . '-01';
+            $to   = date('Y-m-t', strtotime($from));
+
+            $data = $this->txService->byCategory($payload['sub'], $type, $from, $to);
             jsonResponse($data);
         } catch (\Throwable $e) { $this->handleException($e); }
     }
@@ -60,17 +81,6 @@ class DashboardController extends BaseController
             $payload = $this->auth->authenticate();
             $months  = (int) $this->queryParam('months', 12);
             $data    = $this->txService->evolution($payload['sub'], $months);
-            jsonResponse($data);
-        } catch (\Throwable $e) { $this->handleException($e); }
-    }
-
-    // GET /api/dashboard/by-category?month=2026-05
-    public function byCategory(): void
-    {
-        try {
-            $payload = $this->auth->authenticate();
-            $month   = $this->queryParam('month', date('Y-m'));
-            $data    = $this->dashService->getByCategory($payload['sub'], $month);
             jsonResponse($data);
         } catch (\Throwable $e) { $this->handleException($e); }
     }

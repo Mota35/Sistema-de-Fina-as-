@@ -46,27 +46,29 @@ if (file_exists($envFile)) {
 // ─── Load helpers ────────────────────────────────────────────────────────────
 require_once SRC_PATH . '/Helpers/functions.php';
 
-// ─── Load core exceptions ────────────────────────────────────────────────────
-require_once SRC_PATH . '/Exceptions/AppException.php';
-
 // ─── Error handling ──────────────────────────────────────────────────────────
 if (env('APP_DEBUG', 'false') === 'true') {
     error_reporting(E_ALL);
-    ini_set('display_errors', '0');
+    ini_set('display_errors', '0'); // Always off - use JSON responses
 } else {
     error_reporting(0);
     ini_set('display_errors', '0');
 }
 
 set_exception_handler(function (Throwable $e): void {
+    $logger = new \App\Helpers\Logger();
+    $logger->error($e->getMessage(), [
+        'file'  => $e->getFile(),
+        'line'  => $e->getLine(),
+        'trace' => $e->getTraceAsString(),
+    ]);
+
     http_response_code(500);
     header('Content-Type: application/json');
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage(),
-        'file'    => $e->getFile(),
-        'line'    => $e->getLine(),
-        'code'    => $e->getCode() ?: 500,
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        'message' => env('APP_DEBUG') === 'true' ? $e->getMessage() : 'Internal Server Error',
+        'code'    => 500,
+    ]);
     exit;
 });

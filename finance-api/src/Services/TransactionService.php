@@ -124,12 +124,6 @@ class TransactionService
         return $this->repo->summaryByCategory($userId, $type, $from, $to);
     }
 
-    public function export(int $userId, array $filters = [], int $page = 1, int $perPage = 1000): array
-    {
-        $result = $this->repo->allByUser($userId, $filters, $page, $perPage);
-        return $result['items'];
-    }
-
     public function evolution(int $userId, int $months = 12): array
     {
         $rows   = $this->repo->monthlyEvolution($userId, $months);

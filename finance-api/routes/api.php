@@ -18,10 +18,85 @@ $router = new Router();
 // ─────────────────────────────────────────────────────────────────────────────
 $router->get('/api/health', function () {
     jsonResponse([
-        'status'  => 'ok',
-        'version' => env('APP_VERSION', '1.0.0'),
-        'time'    => now(),
+        'status'   => 'ok',
+        'version'  => env('APP_VERSION', '1.0.0'),
+        'time'     => now(),
+        'php'      => PHP_VERSION,
+        'curl'     => function_exists('curl_init') ? 'available' : 'NOT AVAILABLE',
+        'pdo_mysql'=> in_array('mysql', PDO::getAvailableDrivers()) ? 'available' : 'NOT AVAILABLE',
     ]);
+});
+
+// Limpar cache das APIs externas
+$router->get('/api/debug/clear-cache', function () {
+    if (env('APP_ENV') !== 'development') {
+        errorResponse('Not available in production.', 403);
+    }
+    $svc     = new \App\Services\ExternalApiService();
+    $deleted = $svc->clearCache();
+    jsonResponse(['deleted_files' => $deleted, 'message' => "Cache limpo: $deleted ficheiros removidos."]);
+});
+$router->get('/api/debug/external', function () {
+    if (env('APP_ENV') !== 'development') {
+        errorResponse('Not available in production.', 403);
+    }
+
+    $fmpKey      = env('FMP_API_KEY', '');
+    $exchangeKey = env('EXCHANGE_RATE_API_KEY', '');
+
+    $results = [
+        'env' => [
+            'FMP_API_KEY'           => $fmpKey      ? substr($fmpKey, 0, 6) . '...' : '❌ NOT SET',
+            'EXCHANGE_RATE_API_KEY' => $exchangeKey ? substr($exchangeKey, 0, 6) . '...' : '❌ NOT SET',
+        ],
+        'curl_available' => function_exists('curl_init'),
+        'tests' => [],
+    ];
+
+    // Test ExchangeRate
+    if ($exchangeKey && function_exists('curl_init')) {
+        $url = "https://v6.exchangerate-api.com/v6/{$exchangeKey}/latest/USD";
+        $ch  = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url, CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10, CURLOPT_SSL_VERIFYPEER => true,
+        ]);
+        $resp = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err  = curl_error($ch);
+        curl_close($ch);
+        $data = json_decode($resp, true);
+        $results['tests']['exchange_rate'] = [
+            'http_code' => $code,
+            'curl_error'=> $err ?: null,
+            'result'    => $data['result'] ?? 'unknown',
+            'status'    => ($data['result'] ?? '') === 'success' ? '✅ OK' : '❌ FAILED',
+        ];
+    }
+
+    // Test FMP
+    if ($fmpKey && function_exists('curl_init')) {
+        $url = "https://financialmodelingprep.com/api/v3/quote/AAPL?apikey={$fmpKey}";
+        $ch  = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url, CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10, CURLOPT_SSL_VERIFYPEER => true,
+        ]);
+        $resp = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err  = curl_error($ch);
+        curl_close($ch);
+        $data = json_decode($resp, true);
+        $results['tests']['fmp'] = [
+            'http_code'  => $code,
+            'curl_error' => $err ?: null,
+            'got_data'   => is_array($data) && !empty($data),
+            'raw_preview'=> substr($resp ?? '', 0, 200),
+            'status'     => (is_array($data) && !empty($data) && isset($data[0]['price'])) ? '✅ OK' : '❌ FAILED',
+        ];
+    }
+
+    jsonResponse($results);
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -57,13 +132,16 @@ $router->post('/api/profile/avatar', [UserController::class, 'uploadAvatar']);
 // ─────────────────────────────────────────────────────────────────────────────
 // DASHBOARD  (protected)
 // GET    /api/dashboard
+// GET    /api/dashboard/summary       ← alias mensal para o Angular
+// GET    /api/dashboard/by-category   ← despesas/receitas por categoria
+// GET    /api/dashboard/evolution     ← evolução mensal
 // GET    /api/dashboard/forecast
 // ─────────────────────────────────────────────────────────────────────────────
-$router->get('/api/dashboard',          [DashboardController::class, 'index']);
-$router->get('/api/dashboard/forecast', [DashboardController::class, 'forecast']);
 $router->get('/api/dashboard/summary',     [DashboardController::class, 'summary']);
-$router->get('/api/dashboard/evolution',   [DashboardController::class, 'evolution']);
 $router->get('/api/dashboard/by-category', [DashboardController::class, 'byCategory']);
+$router->get('/api/dashboard/evolution',   [DashboardController::class, 'evolution']);
+$router->get('/api/dashboard/forecast',    [DashboardController::class, 'forecast']);
+$router->get('/api/dashboard',             [DashboardController::class, 'index']);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ACCOUNTS  (protected)
@@ -107,7 +185,6 @@ $router->delete('/api/categories/{id}', [CategoryController::class, 'destroy']);
 // DELETE /api/transactions/{id}
 // ─────────────────────────────────────────────────────────────────────────────
 $router->get(   '/api/transactions/summary',     [TransactionController::class, 'summary']);
-$router->get(   '/api/transactions/export',      [TransactionController::class, 'export']);
 $router->get(   '/api/transactions/by-category', [TransactionController::class, 'byCategory']);
 $router->get(   '/api/transactions/evolution',   [TransactionController::class, 'evolution']);
 $router->get(   '/api/transactions',             [TransactionController::class, 'index']);
@@ -147,6 +224,20 @@ $router->get('/api/finance/market',   [FinanceController::class, 'marketSummary'
 $router->get('/api/finance/crypto',   [FinanceController::class, 'cryptoPrices']);
 
 // ─────────────────────────────────────────────────────────────────────────────
+// BUDGETS / ORÇAMENTOS  (protected)
+// GET    /api/budgets?month=2026-05
+// GET    /api/budgets/{id}
+// POST   /api/budgets
+// PUT    /api/budgets/{id}
+// DELETE /api/budgets/{id}
+// ─────────────────────────────────────────────────────────────────────────────
+$router->get(   '/api/budgets',      [BudgetController::class, 'index']);
+$router->get(   '/api/budgets/{id}', [BudgetController::class, 'show']);
+$router->post(  '/api/budgets',      [BudgetController::class, 'store']);
+$router->put(   '/api/budgets/{id}', [BudgetController::class, 'update']);
+$router->delete('/api/budgets/{id}', [BudgetController::class, 'destroy']);
+
+// ─────────────────────────────────────────────────────────────────────────────
 // ADMIN  (admin role required)
 // GET    /api/admin/users
 // GET    /api/admin/users/{id}
@@ -157,11 +248,5 @@ $router->get(   '/api/admin/users',      [UserController::class, 'adminIndex']);
 $router->get(   '/api/admin/users/{id}', [UserController::class, 'adminShow']);
 $router->patch( '/api/admin/users/{id}', [UserController::class, 'adminUpdate']);
 $router->delete('/api/admin/users/{id}', [UserController::class, 'adminDestroy']);
-
-// Budget routes
-$router->get(   '/api/budgets',      [BudgetController::class, 'index']);
-$router->post(  '/api/budgets',      [BudgetController::class, 'store']);
-$router->put(   '/api/budgets/{id}', [BudgetController::class, 'update']);
-$router->delete('/api/budgets/{id}', [BudgetController::class, 'destroy']);
 
 return $router;

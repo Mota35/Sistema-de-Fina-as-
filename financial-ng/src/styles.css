@@ -1,5 +1,0 @@
-/* Import the full design system */
-@import './styles/global.css';
-
-/* Angular Material overrides (if used) */
-* { box-sizing: border-box; }

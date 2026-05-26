@@ -230,8 +230,71 @@ class ExternalApiService
         ];
     }
 
-    // ─── HTTP Client ──────────────────────────────────────────────────────────
-    private function httpGet(string $url, int $timeout = 10): array
+    public function clearCache(): int
+    {
+        $files   = glob(STORAGE_PATH . '/logs/cache_*.json') ?: [];
+        $deleted = 0;
+        foreach ($files as $f) {
+            if (@unlink($f)) $deleted++;
+        }
+        return $deleted;
+    }
+
+    // ─── HTTP Client (cURL) ──────────────────────────────────────────────────
+    private function httpGet(string $url, int $timeout = 15): array
+    {
+        // Prefer cURL (more reliable for HTTPS)
+        if (function_exists('curl_init')) {
+            return $this->curlGet($url, $timeout);
+        }
+
+        // Fallback: file_get_contents
+        return $this->streamGet($url, $timeout);
+    }
+
+    private function curlGet(string $url, int $timeout = 15): array
+    {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => $timeout,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS      => 3,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_HTTPHEADER     => [
+                'Accept: application/json',
+                'User-Agent: FinanceManagerAPI/1.0',
+            ],
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error    = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            $this->logger->error("cURL error for $url: $error");
+            return [];
+        }
+
+        if ($httpCode !== 200) {
+            $this->logger->warning("HTTP $httpCode from $url: " . substr($response, 0, 300));
+            return [];
+        }
+
+        $decoded = json_decode($response, true);
+        if (!is_array($decoded)) {
+            $this->logger->warning("Invalid JSON from $url: " . substr($response, 0, 200));
+            return [];
+        }
+
+        return $decoded;
+    }
+
+    private function streamGet(string $url, int $timeout = 15): array
     {
         $ctx = stream_context_create([
             'http' => [
@@ -245,7 +308,7 @@ class ExternalApiService
         $response = @file_get_contents($url, false, $ctx);
 
         if ($response === false) {
-            $this->logger->warning("External API call failed: $url");
+            $this->logger->warning("stream_get failed: $url");
             return [];
         }
 
