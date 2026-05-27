@@ -538,11 +538,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   evoPath(data: any[], key: 'income'|'expense', w: number, h: number, area: boolean): string {
     if (!data.length) return '';
     const last6 = data.slice(-6);
-    const max   = Math.max(...last6.map((d: any) => Math.max(d.income, d.expense)), 1);
+    // Ensure values are numbers to prevent NaN calculations
+    const max   = Math.max(...last6.map((d: any) => Math.max(Number(d.income) || 0, Number(d.expense) || 0)), 1);
     const step  = w / (last6.length - 1 || 1);
     const pts   = last6.map((d: any, i: number) => {
       const x = i * step;
-      const y = h - (d[key] / max) * (h - 20);
+      const value = Number(d[key]) || 0;
+      const y = h - (value / max) * (h - 20);
       return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
     }).join(' ');
     return area ? `${pts} L${w} ${h} L0 ${h} Z` : pts;

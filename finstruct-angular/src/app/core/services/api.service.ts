@@ -23,6 +23,9 @@ export class AccountService {
   get(id: number): Observable<ApiResponse<Account>> {
     return this.http.get<ApiResponse<Account>>(`${API}/accounts/${id}`);
   }
+  history(id: number, page = 1, perPage = 20): Observable<PaginatedResponse<any>> {
+    return this.http.get<PaginatedResponse<any>>(`${API}/accounts/${id}/history`, { params: { page, per_page: perPage } });
+  }
   summary(): Observable<ApiResponse<AccountSummary>> {
     return this.http.get<ApiResponse<AccountSummary>>(`${API}/accounts/summary`);
   }
@@ -32,8 +35,20 @@ export class AccountService {
   update(id: number, data: Partial<Account>): Observable<ApiResponse<Account>> {
     return this.http.put<ApiResponse<Account>>(`${API}/accounts/${id}`, data);
   }
+  setDefault(id: number): Observable<ApiResponse<any>> {
+    return this.http.patch<ApiResponse<any>>(`${API}/accounts/${id}/default`, {});
+  }
   delete(id: number): Observable<ApiResponse<null>> {
     return this.http.delete<ApiResponse<null>>(`${API}/accounts/${id}`);
+  }
+}
+
+// ─── Transfer Service ─────────────────────────────────────────────────────────
+@Injectable({ providedIn: 'root' })
+export class TransferService {
+  constructor(private http: HttpClient) {}
+  transfer(data: { sender_account_id: number, recipient: string, amount: number, description?: string }): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${API}/transfers`, data);
   }
 }
 

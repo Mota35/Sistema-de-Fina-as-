@@ -25,8 +25,15 @@ class AuthService
             throw new ValidationException(['email' => ['Este email já está em uso.']]);
         }
 
+        // Generate unique 6-digit id_conta
+        $idConta = '';
+        do {
+            $idConta = str_pad((string)rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        } while ($this->userRepo->idContaExists($idConta));
+
         $userId = $this->userRepo->create([
             'role_id'  => 2, // default: user
+            'id_conta' => $idConta,
             'name'     => sanitize($data['name']),
             'email'    => strtolower(trim($data['email'])),
             'password' => password_hash($data['password'], PASSWORD_BCRYPT, ['cost' => 12]),
@@ -38,7 +45,7 @@ class AuthService
         $user = $this->userRepo->findWithRole($userId);
         $this->mailer->sendWelcome($user['email'], $user['name']);
 
-        $this->logger->info("New user registered: {$user['email']}");
+        $this->logger->info("New user registered: {$user['email']} with id_conta: $idConta");
 
         return $this->buildTokenResponse($user);
     }
@@ -136,10 +143,11 @@ class AuthService
     private function buildTokenResponse(array $user): array
     {
         $payload = [
-            'sub'   => $user['id'],
-            'name'  => $user['name'],
-            'email' => $user['email'],
-            'role'  => $user['role_name'],
+            'sub'      => $user['id'],
+            'id_conta' => $user['id_conta'] ?? null,
+            'name'     => $user['name'],
+            'email'    => $user['email'],
+            'role'     => $user['role_name'],
         ];
 
         $tokens = JWT::generateTokenPair($payload);

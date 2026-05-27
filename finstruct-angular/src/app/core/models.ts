@@ -36,7 +36,7 @@ export interface AuthResponse {
 
 // ─── User ────────────────────────────────────────────────────────────────────
 export interface User {
-  id: number; name: string; email: string;
+  id: number; id_conta: string; name: string; email: string;
   role_name: string; language: string;
   theme: 'light' | 'dark'; currency: string;
   status: string; avatar: string | null;
@@ -48,6 +48,7 @@ export type AccountType = 'wallet'|'bank'|'savings'|'credit_card'|'investment';
 export interface Account {
   id: number; user_id: number; name: string;
   type: AccountType; balance: number; created_at: string;
+  is_default_receiving?: boolean;
 }
 export interface AccountSummary {
   total_balance: number;

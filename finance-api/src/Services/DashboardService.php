@@ -29,7 +29,7 @@ class DashboardService
         $lastSummary   = $this->getMonthSummary($userId, $lastMonthYear, $lastMonth);
 
         // Total balance across all accounts
-        $totalBalance = $this->accountRepo->totalBalanceByUser($userId);
+        $totalBalance = (float) $this->accountRepo->totalBalanceByUser($userId);
 
         // Recent transactions
         $recentTransactions = $this->transactionRepo->recentByUser($userId, 5);
@@ -75,21 +75,27 @@ class DashboardService
         return [
             'year'    => $year,
             'month'   => $month,
-            'income'  => $income,
-            'expense' => $expense,
-            'balance' => $income - $expense,
+            'income'  => (float) $income,
+            'expense' => (float) $expense,
+            'balance' => (float) ($income - $expense),
         ];
     }
 
     private function buildComparison(array $current, array $last): array
     {
-        $incomeDiff  = $last['income']  > 0 ? (($current['income']  - $last['income'])  / $last['income'])  * 100 : 0;
-        $expenseDiff = $last['expense'] > 0 ? (($current['expense'] - $last['expense']) / $last['expense']) * 100 : 0;
+        // Ensure all values are floats
+        $currIncome  = (float) $current['income'];
+        $currExpense = (float) $current['expense'];
+        $lastIncome  = (float) $last['income'];
+        $lastExpense = (float) $last['expense'];
+
+        $incomeDiff  = $lastIncome > 0 ? (($currIncome - $lastIncome) / $lastIncome) * 100 : 0;
+        $expenseDiff = $lastExpense > 0 ? (($currExpense - $lastExpense) / $lastExpense) * 100 : 0;
 
         return [
-            'income_change_pct'  => round($incomeDiff,  2),
+            'income_change_pct'  => round($incomeDiff, 2),
             'expense_change_pct' => round($expenseDiff, 2),
-            'income_trend'       => $incomeDiff  >= 0 ? 'up' : 'down',
+            'income_trend'       => $incomeDiff >= 0 ? 'up' : 'down',
             'expense_trend'      => $expenseDiff >= 0 ? 'up' : 'down',
         ];
     }
@@ -106,8 +112,12 @@ class DashboardService
         }
 
         foreach ($result as &$r) {
+            // Ensure all values are floats to prevent type coercion issues
+            $r['income']  = (float) $r['income'];
+            $r['expense'] = (float) $r['expense'];
             $r['balance'] = $r['income'] - $r['expense'];
         }
+        unset($r);
 
         return array_values($result);
     }

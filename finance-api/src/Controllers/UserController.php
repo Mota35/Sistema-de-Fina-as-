@@ -48,7 +48,7 @@ class UserController extends BaseController
         try {
             $payload = $this->auth->authenticate();
             if (empty($_FILES['avatar'])) {
-                errorResponse('Ficheiro de avatar é obrigatório.', 422);
+                throw new \App\Exceptions\ValidationException(['avatar' => ['Ficheiro de avatar é obrigatório.']]);
             }
             $user = $this->service->uploadAvatar($payload['sub'], $_FILES['avatar']);
             jsonResponse($user, 200, 'Avatar atualizado com sucesso.');

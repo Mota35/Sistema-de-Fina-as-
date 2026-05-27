@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { AccountService } from '../../core/services/api.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { MoneyPipe } from '../../shared/pipes/money.pipe';
@@ -66,7 +67,8 @@ const TYPE_COLORS: Record<AccountType, string> = {
   <!-- Account Cards -->
   <div *ngIf="!loading()" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
     <div *ngFor="let acc of accounts()"
-         class="p-5 rounded-2xl border transition-all group"
+         (click)="goToDetail(acc.id)"
+         class="p-5 rounded-2xl border transition-all group cursor-pointer"
          [class]="theme.isDark() ? 'bg-slate-900 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200 shadow-sm hover:shadow-md'">
       <div class="flex items-start justify-between mb-4">
         <div class="flex items-center gap-3">
@@ -164,6 +166,7 @@ const TYPE_COLORS: Record<AccountType, string> = {
 export class AccountsComponent implements OnInit {
   theme = inject(ThemeService);
   private svc = inject(AccountService);
+  private router = inject(Router);
 
   accounts      = signal<Account[]>([]);
   totalBalance  = signal(0);
@@ -211,5 +214,9 @@ export class AccountsComponent implements OnInit {
   deleteAccount(id: number): void {
     if (!confirm('Eliminar esta conta? Todas as transações associadas serão eliminadas.')) return;
     this.svc.delete(id).subscribe(r => { if (r.success) this.load(); });
+  }
+
+  goToDetail(id: number): void {
+    this.router.navigate(['/app/accounts', id]);
   }
 }

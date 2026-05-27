@@ -27,6 +27,7 @@ export const routes: Routes = [
       { path: 'dashboard',    loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
       { path: 'transactions', loadComponent: () => import('./features/transactions/transactions.component').then(m => m.TransactionsComponent) },
       { path: 'accounts',     loadComponent: () => import('./features/accounts/accounts.component').then(m => m.AccountsComponent) },
+      { path: 'accounts/:id', loadComponent: () => import('./features/accounts/account-detail.component').then(m => m.AccountDetailComponent) },
       { path: 'budgets',      loadComponent: () => import('./features/budgets/budgets.component').then(m => m.BudgetsComponent) },
       { path: 'goals',        loadComponent: () => import('./features/goals/goals.component').then(m => m.GoalsComponent) },
       { path: 'investments',  loadComponent: () => import('./features/investments/investments.component').then(m => m.InvestmentsComponent) },

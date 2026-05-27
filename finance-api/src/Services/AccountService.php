@@ -56,6 +56,13 @@ class AccountService
         $this->repo->delete($id);
     }
 
+    public function setDefaultReceiving(int $id, int $userId): void
+    {
+        $account = $this->repo->findUserAccount($id, $userId);
+        if (!$account) throw new NotFoundException('Conta não encontrada.');
+        $this->repo->setDefaultReceiving($id, $userId);
+    }
+
     public function summary(int $userId): array
     {
         return [

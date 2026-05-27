@@ -35,9 +35,9 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
     <div class="p-5 rounded-2xl border" [class]="theme.isDark() ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'">
       <span class="label block">{{ 'tx.income_total' | translate }}</span>
-      <div class="flex items-center justify-between mt-3">
-        <span class="text-xl font-bold font-mono text-white">{{ incomeTotal() | money }}</span>
-        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+      <div class="flex items-center justify-between mt-3 gap-2">
+        <span class="text-lg lg:text-xl font-bold font-mono text-white truncate" [title]="incomeTotal() | money">{{ incomeTotal() | money }}</span>
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
           <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l9.2-9.2M17 17V7H7"/>
           </svg>
@@ -46,9 +46,9 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
     </div>
     <div class="p-5 rounded-2xl border" [class]="theme.isDark() ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'">
       <span class="label block">{{ 'tx.expense_total' | translate }}</span>
-      <div class="flex items-center justify-between mt-3">
-        <span class="text-xl font-bold font-mono text-white">{{ expenseTotal() | money }}</span>
-        <div class="w-8 h-8 rounded-lg bg-red-400/10 flex items-center justify-center">
+      <div class="flex items-center justify-between mt-3 gap-2">
+        <span class="text-lg lg:text-xl font-bold font-mono text-white truncate" [title]="expenseTotal() | money">{{ expenseTotal() | money }}</span>
+        <div class="w-8 h-8 rounded-lg bg-red-400/10 flex items-center justify-center flex-shrink-0">
           <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 7l-9.2 9.2M7 7v10h10"/>
           </svg>
@@ -58,8 +58,10 @@ import { Transaction, Account, Category, TransactionFilters } from '../../core/m
     <div class="p-5 rounded-2xl border border-emerald-500/30 shadow-lg shadow-emerald-500/5"
          [class]="theme.isDark() ? 'bg-slate-900' : 'bg-white'">
       <span class="label block">{{ 'tx.net_balance' | translate }}</span>
-      <div class="flex items-center justify-between mt-3">
-        <span class="text-xl font-bold font-mono" [class]="netBalance() >= 0 ? 'text-emerald-400' : 'text-red-400'">
+      <div class="flex items-center justify-between mt-3 gap-2">
+        <span class="text-lg lg:text-xl font-bold font-mono truncate" 
+              [title]="netBalance() | money"
+              [class]="netBalance() >= 0 ? 'text-emerald-400' : 'text-red-400'">
           {{ netBalance() | money }}
         </span>
       </div>

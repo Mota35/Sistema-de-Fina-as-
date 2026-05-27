@@ -6,17 +6,11 @@ class FileUpload
 {
     private int $maxSize;
     private array $allowedTypes;
-    private string $uploadPath;
 
-    public function __construct(string $uploadPath = null)
+    public function __construct()
     {
         $this->maxSize      = (int) env('UPLOAD_MAX_SIZE', 5242880); // 5MB
         $this->allowedTypes = explode(',', env('ALLOWED_IMAGE_TYPES', 'image/jpeg,image/png,image/gif,image/webp'));
-        $this->uploadPath   = $uploadPath ?? (STORAGE_PATH . '/' . env('AVATAR_PATH', 'uploads/avatars'));
-
-        if (!is_dir($this->uploadPath)) {
-            mkdir($this->uploadPath, 0755, true);
-        }
     }
 
     public function uploadAvatar(array $file): string
@@ -25,12 +19,20 @@ class FileUpload
 
         $ext      = $this->getExtension($file['type']);
         $filename = 'avatar_' . uniqid() . '_' . time() . '.' . $ext;
-        $dest     = $this->uploadPath . '/' . $filename;
-
-        if (!move_uploaded_file($file['tmp_name'], $dest)) {
-            throw new \RuntimeException('Failed to save uploaded file.');
+        
+        // Ensure storage path is absolute and correct
+        $absolutePath = ROOT_PATH . '/storage/uploads/avatars';
+        if (!is_dir($absolutePath)) {
+            mkdir($absolutePath, 0755, true);
         }
 
+        $dest = $absolutePath . '/' . $filename;
+
+        if (!move_uploaded_file($file['tmp_name'], $dest)) {
+            throw new \RuntimeException('Failed to save uploaded file to disk.');
+        }
+
+        // Return relative path for database and public URL matching (starting with storage/)
         return 'storage/uploads/avatars/' . $filename;
     }
 
@@ -66,8 +68,9 @@ class FileUpload
 
     public function deleteFile(string $relativePath): bool
     {
+        // Relative path should be like 'storage/uploads/avatars/filename.jpg'
         $fullPath = ROOT_PATH . '/' . $relativePath;
-        if (file_exists($fullPath)) {
+        if (file_exists($fullPath) && is_file($fullPath)) {
             return unlink($fullPath);
         }
         return false;

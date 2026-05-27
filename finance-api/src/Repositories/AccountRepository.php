@@ -35,6 +35,35 @@ class AccountRepository extends BaseRepository
         return $stmt->fetch() ?: null;
     }
 
+    public function findDefaultReceiving(int $userId): ?array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM accounts WHERE user_id = :uid AND is_default_receiving = 1 LIMIT 1"
+        );
+        $stmt->execute([':uid' => $userId]);
+        return $stmt->fetch() ?: null;
+    }
+
+    public function setDefaultReceiving(int $id, int $userId): void
+    {
+        // 1. Unset existing default
+        $stmt = $this->db->prepare("UPDATE accounts SET is_default_receiving = 0 WHERE user_id = :uid");
+        $stmt->execute([':uid' => $userId]);
+
+        // 2. Set new default
+        $stmt = $this->db->prepare("UPDATE accounts SET is_default_receiving = 1 WHERE id = :id AND user_id = :uid");
+        $stmt->execute([':id' => $id, ':uid' => $userId]);
+    }
+
+    public function findOldestAccount(int $userId): ?array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM accounts WHERE user_id = :uid ORDER BY created_at ASC LIMIT 1"
+        );
+        $stmt->execute([':uid' => $userId]);
+        return $stmt->fetch() ?: null;
+    }
+
     public function totalBalanceByUser(int $userId): float
     {
         $stmt = $this->db->prepare(
@@ -51,6 +80,14 @@ class AccountRepository extends BaseRepository
              FROM accounts WHERE user_id = :uid GROUP BY type"
         );
         $stmt->execute([':uid' => $userId]);
-        return $stmt->fetchAll();
+        $result = $stmt->fetchAll();
+        
+        // Ensure total is a float
+        foreach ($result as &$row) {
+            $row['total'] = (float) $row['total'];
+        }
+        unset($row);
+        
+        return $result;
     }
 }

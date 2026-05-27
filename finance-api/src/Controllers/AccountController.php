@@ -77,7 +77,15 @@ class AccountController extends BaseController
         } catch (\Throwable $e) { $this->handleException($e); }
     }
 
-    // GET /api/accounts/summary
+    public function setDefaultReceiving(int $id): void
+    {
+        try {
+            $payload = $this->auth->authenticate();
+            $this->service->setDefaultReceiving($id, $payload['sub']);
+            jsonResponse(null, 200, 'Conta definida como principal para recebimentos.');
+        } catch (\Throwable $e) { $this->handleException($e); }
+    }
+
     public function summary(): void
     {
         try {

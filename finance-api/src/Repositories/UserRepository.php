@@ -105,6 +105,26 @@ class UserRepository extends BaseRepository
         }
     }
 
+    public function findByIdConta(string $idConta): ?array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT u.*, r.name as role_name
+             FROM users u
+             INNER JOIN roles r ON r.id = u.role_id
+             WHERE u.id_conta = :id_conta LIMIT 1"
+        );
+        $stmt->execute([':id_conta' => $idConta]);
+        $result = $stmt->fetch();
+        return $result ?: null;
+    }
+
+    public function idContaExists(string $idConta): bool
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE id_conta = :id_conta");
+        $stmt->execute([':id_conta' => $idConta]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
     public function listAll(int $page, int $perPage, ?string $search = null): array
     {
         $offset = ($page - 1) * $perPage;
@@ -112,15 +132,10 @@ class UserRepository extends BaseRepository
         $where  = '';
 
         if ($search) {
-            $where = "WHERE u.name LIKE :search OR u.email LIKE :search";
+            $where = "WHERE u.name LIKE :search OR u.email LIKE :search OR u.id_conta LIKE :search";
             $params[':search'] = "%$search%";
         }
 
-        $total = (int) $this->db->prepare(
-            "SELECT COUNT(*) FROM users u $where"
-        )->execute($params) ? $this->db->query("SELECT COUNT(*) FROM users u $where")->fetchColumn() : 0;
-
-        // Re-execute with params
         $countStmt = $this->db->prepare("SELECT COUNT(*) FROM users u $where");
         $countStmt->execute($params);
         $total = (int) $countStmt->fetchColumn();
@@ -129,7 +144,7 @@ class UserRepository extends BaseRepository
         $params[':offset'] = $offset;
 
         $stmt = $this->db->prepare(
-            "SELECT u.id, u.name, u.email, u.avatar, u.language, u.theme,
+            "SELECT u.id, u.id_conta, u.name, u.email, u.avatar, u.language, u.theme,
                     u.currency, u.status, u.created_at, r.name as role_name
              FROM users u
              INNER JOIN roles r ON r.id = u.role_id

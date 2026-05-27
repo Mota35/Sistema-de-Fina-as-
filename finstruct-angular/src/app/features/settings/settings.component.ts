@@ -58,6 +58,7 @@ import { environment } from '../../../environments/environment';
 
         <h3 class="font-black text-base" [class]="theme.isDark() ? 'text-white' : 'text-slate-900'">{{ profile()?.name }}</h3>
         <p class="text-xs mt-0.5" [class]="theme.isDark() ? 'text-slate-400' : 'text-slate-500'">{{ profile()?.email }}</p>
+        <p *ngIf="profile()?.id_conta" class="text-[10px] font-mono font-bold mt-1 text-amber-500 tracking-wider">ID: #{{ profile()?.id_conta }}</p>
         <span class="mt-2 text-[10px] font-mono font-bold px-2 py-0.5 rounded-md"
               [class]="theme.isDark() ? 'bg-amber-500/10 text-amber-400' : 'bg-blue-50 text-blue-600'">
           {{ profile()?.role_name | uppercase }}
@@ -294,11 +295,24 @@ export class SettingsComponent implements OnInit {
   onAvatarChange(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    this.userSvc.uploadAvatar(file).subscribe(r => {
-      if (r.success) {
-        this.profile.set(r.data);
-        this.auth.updateCurrentUser(r.data);
-        this.showSuccess('settings.avatar_updated');
+
+    // Optional: client-side validation
+    if (file.size > 5 * 1024 * 1024) {
+      this.profileError.set('O ficheiro é demasiado grande (Máx 5MB).');
+      return;
+    }
+
+    this.profileError.set('');
+    this.userSvc.uploadAvatar(file).subscribe({
+      next: r => {
+        if (r.success) {
+          this.profile.set(r.data);
+          this.auth.updateCurrentUser(r.data);
+          this.showSuccess('settings.avatar_updated');
+        }
+      },
+      error: e => {
+        this.profileError.set(e.error?.message || 'Erro ao carregar imagem de perfil.');
       }
     });
   }

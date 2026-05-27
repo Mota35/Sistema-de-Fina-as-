@@ -10,6 +10,7 @@ use App\Controllers\UserController;
 use App\Controllers\DashboardController;
 use App\Controllers\FinanceController;
 use App\Controllers\BudgetController;
+use App\Controllers\TransferController;
 
 $router = new Router();
 
@@ -156,8 +157,16 @@ $router->get(   '/api/accounts/summary', [AccountController::class, 'summary']);
 $router->get(   '/api/accounts',         [AccountController::class, 'index']);
 $router->get(   '/api/accounts/{id}',    [AccountController::class, 'show']);
 $router->post(  '/api/accounts',         [AccountController::class, 'store']);
-$router->put(   '/api/accounts/{id}',    [AccountController::class, 'update']);
-$router->delete('/api/accounts/{id}',    [AccountController::class, 'destroy']);
+$router->put(   '/api/accounts/{id}',         [AccountController::class, 'update']);
+$router->patch( '/api/accounts/{id}/default', [AccountController::class, 'setDefaultReceiving']);
+$router->delete('/api/accounts/{id}',         [AccountController::class, 'destroy']);
+$router->get(   '/api/accounts/{id}/history', [TransferController::class, 'history']);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TRANSFERS  (protected)
+// POST   /api/transfers
+// ─────────────────────────────────────────────────────────────────────────────
+$router->post('/api/transfers', [TransferController::class, 'store']);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CATEGORIES  (protected)
